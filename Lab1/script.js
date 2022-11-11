@@ -33,6 +33,11 @@ function getResultValue() {
   )} Min: ${min}, Max: ${max}, Avg: ${getAvg(values)}`;
 }
 
+function addNewField() {
+  const newInput = document.createElement("input");
+  inputs.appendChild(newInput);
+}
+
 function init() {
   for (input of inputs) {
     input.addEventListener("keyup", (e) => {
