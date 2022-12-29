@@ -17,11 +17,41 @@ function getAvg(arr) {
 
 function getInputValues() {
   const values = [];
-  for (input of inputs) {
+
+  for (let input of inputs) {
     values.push(parseInt(input.value || 0));
   }
 
   return values;
+}
+
+function removeField(e) {
+  console.log(e.target.parentNode);
+  e.target.parentNode.remove();
+  getResultValue();
+}
+
+function addNewField() {
+  const fieldContainer = document.getElementById("fields");
+  const newWrapper = document.createElement("div");
+  newWrapper.className = "input";
+  const newInp = document.createElement("input");
+  newInp.setAttribute("type", "number");
+  const newBtn = document.createElement("button");
+  newBtn.innerText = "x";
+
+  newInp.addEventListener("keyup", (e) => {
+    getResultValue();
+  });
+
+  newBtn.addEventListener("click", (e) => {
+    removeField(e);
+  });
+
+  newWrapper.appendChild(newInp);
+  newWrapper.appendChild(newBtn);
+  fieldContainer.appendChild(newWrapper);
+  getResultValue();
 }
 
 function getResultValue() {
@@ -33,20 +63,25 @@ function getResultValue() {
   )} Min: ${min}, Max: ${max}, Avg: ${getAvg(values)}`;
 }
 
-function addNewField() {
-  const newInput = document.createElement("input");
-  inputs.appendChild(newInput);
-}
-
 function init() {
-  for (input of inputs) {
+  document.getElementById("addNew").addEventListener("click", addNewField);
+
+  const fields = document.querySelectorAll(".input");
+  console.log(fields);
+
+  for (let field of fields) {
+    field.querySelector("button").addEventListener("click", (e) => {
+      removeField(e);
+    });
+  }
+
+  for (let input of inputs) {
     input.addEventListener("keyup", (e) => {
       getResultValue();
     });
   }
+
   getResultValue();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  init();
-});
+init();
