@@ -93,126 +93,36 @@ class NoteList {
   }
 }
 
-const submitBtn = document.getElementById("create_task");
-const remainingNotesContainer = document.getElementById("remaining-notes");
-const doneNotesContainer = document.getElementById("done-notes");
+const createSubmitBtn = document.getElementById("createNote");
+const editSubmitBtn = document.getElementById("editNote");
+const remainingNotesContainer = document.getElementById("remainingNotes");
+const doneNotesContainer = document.getElementById("doneNotes");
 const searchInp = document.getElementById("search");
-
-// const app = {
-//   notes: Storage.getData("notes") || [],
-//   searchText: "",
-//   init() {
-//     submitBtn.addEventListener("click", () => {
-//       this.addNoteToList();
-//     });
-//     searchInp.addEventListener("keyup", (e) => {
-//       this.filterNotes(e);
-//     });
-//     this.renderList(this.notes);
-//   },
-//   renderList(notes) {
-//     listContainer.innerHTML = "";
-
-//     if (!notes || !notes.length) return;
-
-//     notes.forEach((note) => this.renderNoteItem(note));
-//   },
-//   renderNoteItem(note) {
-//     const createElement = document.createElement("li");
-//     createElement.className = "note p-3";
-//     const rgbColor = hexToRgb(note.color);
-//     createElement.style.background = `rgba(${rgbColor},0.12)`;
-
-//     // const createDeleteBtn = document.createElement("button");
-//     // createDeleteBtn.innerText = "Delete";
-//     // createDeleteBtn.addEventListener("click", () => {
-//     //   this.deleteNote(note.id);
-//     // });
-
-//     createElement.innerHTML = `
-//     <div>
-//       <h3 class="note-title">${note.title || "-"}</h3>
-//       <span class="edit-note">Edit</span>
-//       <span class="delete-note">Delete</span>
-//     </div>
-//     <div class="d-flex justify-content-between w-100">
-//       <p class="m-0">${note.content || "-"}</p>
-//       <p class="m-0">${note.createdAt || "-"}</p>
-//     </div>
-//     `;
-
-//     listContainer.appendChild(createElement);
-
-//     listContainer
-//       .querySelector(".delete-note")
-//       .addEventListener("click", () => {
-//         this.deleteNote(note.id);
-//       });
-
-//     listContainer.querySelector(".edit-note").addEventListener("click", () => {
-//       this.deleteNote(note.id);
-//     });
-//   },
-//   addNoteToList() {
-//     const title = document.getElementById("title").value;
-//     const content = document.getElementById("content").value;
-//     const color = document.getElementById("color").value;
-//     const pin = document.getElementById("pin").value;
-//     const newNote = {
-//       id: uuidv4(),
-//       title,
-//       content,
-//       color,
-//       pin,
-//       createdAt: new Date(),
-//       isComplete: false,
-//     };
-
-//     this.notes.push(newNote);
-//     this.renderNoteItem(newNote);
-//     Storage.setData("notes", JSON.stringify(this.notes));
-//   },
-//   filterNotes(e) {
-//     const { value } = e.target;
-//     this.searchText = value;
-//     const notes = this.notes.filter(
-//       (note) =>
-//         note.title.indexOf(value) !== -1 || note.content.indexOf(value) !== -1
-//     );
-//     console.log(notes, "filtered");
-//     this.renderList(notes);
-//   },
-//   deleteNote(id) {
-//     console.log(id);
-//     const notes = this.notes.filter((note) => note.id == id);
-//     this.notes = [...notes];
-//     Storage.setData("notes", JSON.stringify(this.notes));
-//     this.renderList(notes);
-//   },
-//   editNote(updatedNote) {
-//     const notes = this.notes.map((note) =>
-//       note.id === updatedNote.id ? updatedNote : note
-//     );
-
-//     // Storage.setData("notes", JSON.stringify(this.notes));
-//     // this.renderList(notes);
-//   },
-//   markNoteAsCompleted(e) {},
-// };
-
-// app.init();
 
 class App {
   noteList = new NoteList();
+  silentMode = false;
+  currentEditingNote;
 
   initialize() {
-    submitBtn.addEventListener("click", () => {
+    // document.querySelector("input[type='datetime-local']").min =
+    //   new Date().toISOString();
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+
+    document.getElementById("remindAt").min = now.toISOString().slice(0, 16);
+    document.getElementById("remindAt").value = now.toISOString().slice(0, 16);
+
+    createSubmitBtn.addEventListener("click", () => {
       this.handleCreateNote();
+    });
+    editSubmitBtn.addEventListener("click", () => {
+      this.handleEditNote();
     });
     searchInp.addEventListener("keyup", (e) => {
       this.handleFilteringNote(e);
     });
-    // this.renderList(this.notes);
+
     this.renderNotes();
   }
 
@@ -220,20 +130,46 @@ class App {
     const title = document.getElementById("title").value;
     const content = document.getElementById("content").value;
     const color = document.getElementById("color").value;
+    const tag = document.getElementById("tag").value;
     const pin = document.getElementById("pin").checked;
+    const showReminder = document.getElementById("showReminder").checked;
+    const remindAt = document.getElementById("remindAt").value;
 
     const note = {
       title,
       content,
       color,
       pin,
+      tags: [tag],
+      remindAt: showReminder ? remindAt : null,
     };
     this.noteList.addNote(note);
     this.renderNotes();
   }
 
-  handleEditNote(id) {
-    this.noteList.editNote(id);
+  setNoteValuesToEditForm(note) {
+    this.currentEditingNote = note;
+    document.getElementById("editTitle").value = note.title;
+    document.getElementById("editContent").value = note.content;
+    document.getElementById("editColor").value = note.color;
+    document.getElementById("editPin").checked = note.pin;
+  }
+
+  handleEditNote() {
+    const title = document.getElementById("editTitle").value;
+    const content = document.getElementById("editContent").value;
+    const color = document.getElementById("editColor").value;
+    const pin = document.getElementById("editPin").checked;
+
+    const note = {
+      ...this.currentEditingNote,
+      title,
+      content,
+      color,
+      pin,
+    };
+
+    this.noteList.editNote(note);
     this.renderNotes();
   }
 
@@ -262,15 +198,16 @@ class App {
       <div>
         <h3 class="note-title">${note.title || "-"}</h3>
       </div>
+      <p class="m-0">${note.content || "-"}</p>
       <div class="d-flex justify-content-between w-100">
-        <p class="m-0">${note.content || "-"}</p>
-        <p class="m-0">${note.createdAt || "-"}</p>
+        <p class="m-0">${note.tags?.map((tag) => tag) || "-"}</p></br>
+        <p class="m-0">${new Date(note.createdAt).toDateString() || "-"}</p>
       </div>
     `;
 
     // toggle action
     const createToggleBtn = document.createElement("button");
-    createToggleBtn.innerText = "Toggle";
+    createToggleBtn.innerText = note.isComplete ? "Move to do" : "Mark as done";
     createToggleBtn.addEventListener("click", () =>
       this.handleToggleNote(note.id)
     );
@@ -285,7 +222,21 @@ class App {
     // edit action
     const createEditBtn = document.createElement("button");
     createEditBtn.innerText = "Edit";
-    createEditBtn.addEventListener("click", () => this.handleEditNote(note.id));
+    createEditBtn.setAttribute("data-toggle", "modal");
+    createEditBtn.setAttribute("data-target", "#editModal");
+    createEditBtn.addEventListener("click", () =>
+      this.setNoteValuesToEditForm(note)
+    );
+
+    if (note.remindAt && !this.silentMode) {
+      const wait = new Date(note.remindAt).getTime() - Date.now();
+
+      if (wait > 0) {
+        setTimeout(() => {
+          alert("Przypomnienie wydarzenia: " + note.title);
+        }, wait);
+      }
+    }
 
     createElement.appendChild(createToggleBtn);
     createElement.appendChild(createDeleteBtn);

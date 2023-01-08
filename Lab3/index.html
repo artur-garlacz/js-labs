@@ -10,14 +10,21 @@
 <body>
     <div>
         <div class="tracks">
-            <div id="track1" class="track">1 <button>Play</button></div>
-            <div id="track2" class="track">2 <button>Play</button></div>
-            <div id="track3" class="track">3 <button>Play</button></div>
-            <div id="track4" class="track">4 <button>Play</button></div>
+            <div id="track1" class="track">1 <button>Play</button>
+                <audio hidden controls id="track1-player"></audio>
+            </div>
+            <div id="track2" class="track">2 <button>Play</button>
+                <audio hidden controls id="track2-player"></audio>
+            </div>
+            <div id="track3" class="track">3 <button>Play</button>
+                <audio hidden controls id="track3-player"></audio>
+            </div>
+            <div id="track4" class="track">4 <button>Play</button>
+                <audio hidden controls id="track4-player"></audio>
+            </div>
         </div>
 
         <audio hidden controls id="player"></audio>
-        <audio controls hidden id="test"></audio>
     </div>
     <script src="drumkit.js"></script>
 </body>

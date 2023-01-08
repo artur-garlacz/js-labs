@@ -41,6 +41,21 @@ const chars = [
 
 const tracks = document.getElementsByClassName("track");
 
+function playSound(url) {
+  return new Promise(function (resolve, reject) {
+    console.log("audio");
+
+    // return a promise
+    const audio = new Audio(); // create audio wo/ src
+    audio.preload = "auto"; // intend to play through
+    audio.autoplay = true; // autoplay when loaded
+    audio.onerror = reject; // on error, reject
+    audio.onended = resolve; // when done, resolve
+
+    audio.src = url;
+  });
+}
+
 function getArrayIndex(array, index) {
   if (array.length % index === 0) return 0;
 
@@ -68,18 +83,28 @@ const app = {
     const sound = KeyToSound[event.key];
     this.setPlayer(sound);
   },
-  setPlayer(sound) {
-    const player = document.querySelector("#player");
+  setPlayer(sound, playerId = "#player") {
+    const player = document.querySelector(playerId);
     player.setAttribute("src", `./sounds/${sound}.wav`);
     this.addSoundToRecording(sound);
-    this.playSound(player);
+    // this.playSound(player);
+    playSound(`./sounds/${sound}.wav`);
   },
-  playSound(sound) {
-    sound.currentTime = 0;
-    sound.play();
-  },
+  // playSound(sound) {
+  //   sound.currentTime = 0;
+  //   const playPromise = sound.play();
+
+  //   console.log(sound, playPromise);
+
+  //   if (playPromise != undefined) {
+  //     playPromise
+  //       .then(() => {
+  //         sound.pause();
+  //       })
+  //       .catch((err) => console.log(err));
+  //   }
+  // },
   addSoundToRecording(sound) {
-    console.log(sound);
     if (!this.currentTrack) return;
 
     this.trackRecordings[this.currentTrack].push(sound);
@@ -95,9 +120,40 @@ const app = {
     if (!this.currentTrack || !this.trackRecordings[this.currentTrack].length)
       return;
 
-    this.trackRecordings[this.currentTrack].forEach((sound) => {
-      this.setPlayer(sound);
-    });
+    const playlist = this.trackRecordings[this.currentTrack];
+    // this.setPlayer(sound, `#${this.currentTrack}-player`);
+    console.log("SOUND");
+    // playSound(`./sounds/${sound}.wav`);
+
+    const audio = new Audio();
+    let i = 0;
+
+    audio.addEventListener(
+      "ended",
+      function () {
+        console.log(i, playlist, playlist[i]);
+
+        if (++i === playlist.length) {
+          audio.pause();
+        }
+        audio.playbackRate = 0.2;
+        audio.src = `./sounds/${playlist[i]}.wav`;
+        audio.play();
+      },
+      true
+    );
+    audio.volume = 0.3;
+    audio.loop = false;
+    audio.playbackRate = 0.2;
+    audio.src = `./sounds/${playlist[0]}.wav`;
+    audio.play();
+
+    // playSound(`./sounds/${playlist[0]}.wav`).then(() => {
+    //   console.log(i, playlist, playlist[i]);
+
+    //   i = ++i < playlist.length ? i : 0;
+    //   playSound(`./sounds/${playlist[i]}.wav`);
+    // });
   },
   assingTracks() {
     for (let i = 0; i < tracks.length; i++) {
@@ -126,6 +182,4 @@ const app = {
   },
 };
 
-document.addEventListener("DOMContentLoaded", () => {
-  app.init();
-});
+app.init();
