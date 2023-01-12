@@ -5,6 +5,25 @@ document.addEventListener("DOMContentLoaded", () => {
   _viewModel.setView();
 });
 
+const uuidv4 = () => {
+  return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+    (
+      c ^
+      (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+    ).toString(16)
+  );
+};
+
+class Place {
+  name;
+  country;
+
+  constructor(name, country) {
+    this.name = name;
+    this.country = country;
+  }
+}
+
 const _viewModel = {
   addressValue: document.getElementById("title-location"),
   tempValue: document.querySelector(".temp"),
@@ -14,26 +33,101 @@ const _viewModel = {
   pressureValue: document.querySelector(".pressure-value"),
   conditionsValue: document.querySelector(".conditions"),
   currentPosition: null,
-  weatherList: [],
+  favPlaces: JSON.parse(localStorage.getItem("favPlaces")) || [],
+  historicalWeathers: localStorage.getItem("favPlaces") || [],
   setView() {
-    let titleDate = document.getElementById("title-date");
-    titleDate.innerHTML = this.getCurrentTime();
+    // let titleDate = document.getElementById("title-date");
+    // titleDate.innerHTML = this.getCurrentTime();
     document
       .querySelector(".form-search-btn")
       .addEventListener("click", () => this.fetchWeatherDataFromUser());
 
-    this.loadWeatherList();
+    // this.loadWeatherList();
+    setInterval(() => {
+      this.getWeatherForFavPlaces(this.renderFavPlacesWeather);
+    }, 5000);
   },
-  loadWeatherList() {
-    this.weatherList = JSON.parse(localStorage.getItem("weathers")) || [];
-    const weatherListElement = document.getElementById("weather-list");
+  renderFavPlaceWeather(weather) {
+    const { humidity, pressure, temp, temp_max, temp_min } = weather.main;
+    const { main, icon } = data.weather[0];
+    const {
+      tempValue,
+      temp_maxValue,
+      temp_minValue,
+      humidityValue,
+      pressureValue,
+      conditionsValue,
+    } = _viewModel;
 
-    this.weatherList.forEach((weather) => {
+    // tempValue.innerHTML = temp;
+    // temp_maxValue.innerHTML = temp_max;
+    // temp_minValue.innerHTML = temp_min;
+    // humidityValue.innerHTML = humidity;
+    // pressureValue.innerHTML = pressure;
+    // conditionsValue.innerHTML = main;
+
+    `<h1 class="location" id="title-location"></h1>
+    <h2 class="date" id="title-date"></h2>
+    <div class="weatherIcon">
+      <div class="sunny">
+        <div class="inner"></div>
+      </div>
+    </div>
+    <p class="temp"></p>
+    <p class="conditions">Sunny</p>
+    <p class="tempRange">
+      <span class="high"></span> | <span class="low"></span>
+    </p>
+    <p class="humidity">
+      <span class="humidity-label">Humidity:</span>
+      <span class="humidity-value"></span>
+    </p>
+    <p class="pressure">
+      <span class="pressure-label">Pressure:</span>
+      <span class="pressure-value"></span>
+    </p>`;
+  },
+  renderFavPlacesWeather(favPlaces) {
+    const container = document.getElementById("fav-weather-list");
+    container.innerHTML = "";
+    // this.weatherList = JSON.parse(localStorage.getItem("weathers")) || [];
+    // const weatherListElement = document.getElementById("weather-list");
+    // const favPlaces = await getWeatherForFavPlaces();
+    console.log(favPlaces, "favPlaces");
+    favPlaces.forEach((weather) => {
       let item = document.createElement("li");
       item.classList.add("weather-item");
       item.innerText = weather.name;
-      weatherListElement.appendChild(item);
+
+      container.appendChild(item);
     });
+  },
+  async getWeatherForFavPlaces(cb) {
+    if (!this.favPlaces.length) return;
+
+    const reqs = this.favPlaces.map((place) =>
+      this.fetchWeather(place.city, place.country)
+    );
+
+    Promise.all(reqs)
+      .then((res) => {
+        return cb(res);
+      })
+      .catch((error) => {
+        console.log("Error" + error);
+      });
+  },
+  addFavPlace(place) {
+    if (this.favPlaces.length === 10) return;
+
+    this.favPlaces.push(place);
+    localStorage.setItem("favPlaces", JSON.stringify(this.favPlaces));
+  },
+  removeFavPlace(place) {
+    if (!this.favPlaces.length) return;
+
+    this.favPlaces.push(place);
+    localStorage.setItem("favPlaces", JSON.stringify(this.favPlaces));
   },
   addWeatherToList(data) {
     this.weatherList.push(data);
@@ -68,14 +162,21 @@ const _viewModel = {
       date.toLocaleTimeString()
     );
   },
-  async fetchWeatherDataFromUser() {
-    let city = document.getElementById("city-input").value;
-    let country = document.getElementById("country-input").value;
-    console.log(city, country);
-    let api_call_by_user = await fetch(
+  async fetchWeather(city, country) {
+    const weather = await fetch(
       `https://api.openweathermap.org/data/2.5/weather?q=${city},${country}&appid=${API_KEY}&units=metric`
     );
-    let data = await api_call_by_user.json();
+    return weather.json();
+  },
+  async fetchWeatherDataFromUser() {
+    const city = document.getElementById("city-input").value;
+    const country = document.getElementById("country-input").value;
+    console.log(city, country);
+
+    this.addFavPlace({ city, country, id: uuidv4() });
+
+    const weather = await this.fetchWeather(city, country);
+    const data = await weather.json();
     console.log(data);
     if (data.cod === 200) {
       this.displayData(data);
@@ -104,8 +205,8 @@ const _viewModel = {
     humidityValue.innerHTML = humidity;
     pressureValue.innerHTML = pressure;
     conditionsValue.innerHTML = main;
-    console.log(data);
-    document.body.style.backgroundColor = _viewModel.getChangeBackground(main);
+
+    document.body.style.backgroundColor = this.getChangeBackground(main);
     document.querySelector(".inner").innerHTML = "";
     let weatherImg = document.createElement("img");
     weatherImg.setAttribute(
@@ -114,23 +215,18 @@ const _viewModel = {
     );
     document.querySelector(".inner").appendChild(weatherImg);
   },
-  getChangeBackground(value) {
+  getChangeBackground(value = "Clouds") {
     // returns backgroundColor depends on current weather
-    switch (value) {
-      case "Thunderstorm":
-        return (backgroundColor = "#000000");
-      case "Rain":
-        return (backgroundColor = "#3C424C");
-      case "Snow":
-        return (backgroundColor = "#EDEFF3");
-      case "Clouds":
-        return (backgroundColor = "#979999");
-      case "Clear":
-        return (backgroundColor = "#86B9E0");
-      case "Fog":
-        return (backgroundColor = "#B8B8B8");
-      case "Drizzle":
-        return (backgroundColor = "#B8B8B8");
-    }
+    return weatherBackground[value];
   },
+};
+
+const weatherBackground = {
+  Thunderstorm: "#000000",
+  Rain: "#3C424C",
+  Snow: "#EDEFF3",
+  Clouds: "#979999",
+  Clear: "#86B9E0",
+  Fog: "#B8B8B8",
+  Drizzle: "#B8B8B8",
 };
