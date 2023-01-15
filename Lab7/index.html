@@ -19,60 +19,40 @@
 
   <body>
     <div class="container-fluid h-100">
-      <div class="row">
-        <div class="col col-sm-4">
+      <div class="row flex-column">
+        <div class="col col-sm-12">
           <h2 class="section-title">Search weather by city</h2>
-          <div class="search-form" id="search">
+          <div class="d-flex justify-content-center" id="search">
             <input
               class="form-search-input"
-              id="city-input"
+              id="search-input"
               type="text"
               placeholder="City..."
               name="city"
             />
-            <input
-              class="form-search-input"
-              id="country-input"
-              type="text"
-              placeholder="Country..."
-              name="country"
-            />
             <button class="form-search-btn">Search</button>
           </div>
           <hr />
-          <h2 class="section-title">Favourite places</h2>
-          <div>
+          <!-- <div>
             <ul id="historical-weather-list"></ul>
-          </div>
-        </div>
-        <div class="col col-sm-8">
-          <!-- <div id="current">
-            <h1 class="location" id="title-location"></h1>
-            <h2 class="date" id="title-date"></h2>
-            <div class="weatherIcon">
-              <div class="sunny">
-                <div class="inner"></div>
-              </div>
-            </div>
-            <p class="temp"></p>
-            <p class="conditions">Sunny</p>
-            <p class="tempRange">
-              <span class="high"></span> | <span class="low"></span>
-            </p>
-            <p class="humidity">
-              <span class="humidity-label">Humidity:</span>
-              <span class="humidity-value"></span>
-            </p>
-            <p class="pressure">
-              <span class="pressure-label">Pressure:</span>
-              <span class="pressure-value"></span>
-            </p>
           </div> -->
-          <ul id="fav-weather-list"></ul>
+        </div>
+        <div class="col col-sm-12">
+          <div class="row">
+            <div class="col-sm-4">
+              <h2>Current place</h2>
+              <ul id="searched-weather"></ul>
+            </div>
+            <div class="col-sm-8">
+              <h2>Favourite places</h2>
+              <ul id="fav-weather-list"></ul>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDwQl8QdFAuyJF3KGe1wcju_Ozl1_lVDuY"></script>
+    <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDwQl8QdFAuyJF3KGe1wcju_Ozl1_lVDuY"></script> -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDw6cRMC4psyblPXZ5P6eA9vF17oZ_qVXI&libraries=places"></script>
     <script src="./script.js"></script>
   </body>
 </html>
