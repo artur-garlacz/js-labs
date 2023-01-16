@@ -81,8 +81,8 @@ const _viewModel = {
     </p>`;
 
     if (isFav) {
-      const deleteBtn = document.createElement("button");
-      deleteBtn.innerText = "Remove from favourites";
+      const deleteBtn = document.createElement("i");
+      deleteBtn.className = "remove-btn fa fa-trash";
       deleteBtn.onclick = () => this.removeFavPlace(place.id);
       content.appendChild(deleteBtn);
     } else {
@@ -97,6 +97,13 @@ const _viewModel = {
       !currPlaceIsFav && content.appendChild(addFavBtn);
     }
 
+    const detailsBtn = document.createElement("button");
+    detailsBtn.innerText = "Show details";
+    detailsBtn.setAttribute("data-toggle", "modal");
+    detailsBtn.setAttribute("data-target", "#editModal");
+    detailsBtn.addEventListener("click", () => this.renderWeatherChart(place));
+
+    content.appendChild(detailsBtn);
     item.appendChild(content);
     return item;
   },
@@ -108,6 +115,16 @@ const _viewModel = {
       const item = this.createWeatherCard(weather, this.favPlaces[idx]);
       container.appendChild(item);
     });
+  },
+  async renderWeatherChart(place) {
+    console.log(place);
+    const currDate = Date.now();
+    const startDate = currDate - 12 * 1000 * 3600;
+    const data = await this.fetchHistoricalWeather(place.city, place.country, {
+      start: startDate,
+      end: currDate,
+    });
+    console.log(data, "data");
   },
   async getWeatherForFavPlaces(cb) {
     if (!this.favPlaces.length) return;
@@ -155,6 +172,12 @@ const _viewModel = {
   async fetchWeather(city, country) {
     const weather = await fetch(
       `https://api.openweathermap.org/data/2.5/weather?q=${city},${country}&appid=${API_KEY}&units=metric`
+    );
+    return weather.json();
+  },
+  async fetchHistoricalWeather(city, country, { start, end }) {
+    const weather = await fetch(
+      `https://history.openweathermap.org/data/2.5/history/city?q=${city},${country}&type=hour&start=${start}&end=${end}&appid=${API_KEY}`
     );
     return weather.json();
   },

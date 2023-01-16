@@ -1,25 +1,21 @@
-body{
-    margin: 0;
-    padding: 0;
-    height: 100vh;
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
 }
 
-ul{
-    padding: 0;
+ul {
+  padding: 0;
 }
 
-li{
-    list-style: none;
+.note {
+  border-left: 2px solid #000000;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.note{
-    border-left: 2px solid #000000;
-    margin-bottom: 8px;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.note-title{
-    font-size: 18px;
-    margin-bottom: 0;
+.note-title {
+  font-size: 18px;
+  margin-bottom: 0;
 }

@@ -39,7 +39,9 @@ const chars = [
   "z",
 ];
 
-const tracks = document.getElementsByClassName("track");
+const playAllTracksBtn = document.getElementById("playAllTracks");
+const playSelectedTracksBtn = document.getElementById("playSelectedTracks");
+const createTrackBtn = document.getElementById("createTrack");
 
 function playSound(url) {
   return new Promise(function (resolve, reject) {
@@ -74,10 +76,15 @@ const KeyToSound = chars.reduce((prev, curr, index) => {
 
 const app = {
   currentTrack: null,
+  selectedTracks: [],
   trackRecordings: {},
   init() {
     document.addEventListener("keypress", (e) => this.onKeyPress(e));
     this.assingTracks();
+    this.initSelectingTrack();
+    playAllTracksBtn.onclick = () => this.playAllRecordings();
+    playSelectedTracksBtn.onclick = () => this.playSelectedRecordings();
+    createTrackBtn.onclick = () => this.createTrack();
   },
   onKeyPress(event) {
     const sound = KeyToSound[event.key];
@@ -107,46 +114,72 @@ const app = {
   addSoundToRecording(sound) {
     if (!this.currentTrack) return;
 
-    this.trackRecordings[this.currentTrack].push(sound);
+    this.trackRecordings[this.currentTrack].push({
+      sound,
+      startTime: Date.now(),
+    });
   },
   initTrackRecordings(trackId) {
     this.trackRecordings[trackId] = [];
   },
-  playRecording(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log("playRecording");
+  initSelectingTrack() {
+    document.querySelectorAll(".track").forEach((track) => {
+      track.querySelector("input").addEventListener("click", (e) => {
+        this.selectedTracks.push(track.getAttribute("id"));
+      });
+    });
+  },
+  playAllRecordings() {
+    Object.keys(this.trackRecordings).forEach((trackId) => {
+      this.playRecording(trackId);
+    });
+  },
+  playSelectedRecordings() {
+    if (!this.selectedTracks.length) return;
 
-    if (!this.currentTrack || !this.trackRecordings[this.currentTrack].length)
-      return;
+    this.selectedTracks.forEach((track) => {
+      this.playRecording(track);
+    });
+  },
+  playRecording(currentTrack) {
+    console.log(currentTrack, "playRecording");
+    currentTrack = currentTrack || this.currentTrack;
+    if (!currentTrack || !this.trackRecordings[currentTrack].length) return;
 
-    const playlist = this.trackRecordings[this.currentTrack];
+    const playlist = this.trackRecordings[currentTrack];
     // this.setPlayer(sound, `#${this.currentTrack}-player`);
     console.log("SOUND");
     // playSound(`./sounds/${sound}.wav`);
 
-    const audio = new Audio();
     let i = 0;
 
-    audio.addEventListener(
-      "ended",
-      function () {
-        console.log(i, playlist, playlist[i]);
+    // audio.addEventListener(
+    //   "ended",
+    //   function () {
+    //     console.log(i, playlist, playlist[i]);
 
-        if (++i === playlist.length) {
-          audio.pause();
-        }
-        audio.playbackRate = 0.2;
-        audio.src = `./sounds/${playlist[i]}.wav`;
-        audio.play();
-      },
-      true
-    );
-    audio.volume = 0.3;
-    audio.loop = false;
-    audio.playbackRate = 0.2;
-    audio.src = `./sounds/${playlist[0]}.wav`;
-    audio.play();
+    //     if (++i === playlist.length) {
+    //       audio.pause();
+    //     }
+    //     audio.src = `./sounds/${playlist[i]}.wav`;
+    //     audio.play();
+    //   },
+    //   true
+    // );
+    // audo.volume = 0.3;
+    let delayTime = 0;
+    playlist.forEach(({ sound, startTime }, idx) => {
+      delayTime +=
+        idx === 0 ? delayTime : startTime - playlist[idx - 1].startTime;
+      setTimeout(() => {
+        // const audio = new Audio();
+        // audio.loop = false;
+        // audio.src = `./sounds/${sound}.wav`;
+        // console.log(audio, audio.src);
+        // audio.play();
+        playSound(`./sounds/${sound}.wav`);
+      }, delayTime);
+    });
 
     // playSound(`./sounds/${playlist[0]}.wav`).then(() => {
     //   console.log(i, playlist, playlist[i]);
@@ -156,6 +189,8 @@ const app = {
     // });
   },
   assingTracks() {
+    const tracks = document.getElementsByClassName("track");
+
     for (let i = 0; i < tracks.length; i++) {
       const track = tracks[i];
       const trackId = track.getAttribute("id");
@@ -164,6 +199,27 @@ const app = {
       this.assingPlayerButton(track);
       track.addEventListener("click", (e) => this.toggleSelectedTrack(e));
     }
+  },
+  createTrack() {
+    const tracks = document.getElementsByClassName("track");
+
+    const track = document.createElement("div");
+    track.setAttribute("id", `track${tracks.length + 1}`);
+    track.className = "track";
+
+    const inp = document.createElement("input");
+    inp.setAttribute("type", "checkbox");
+
+    const playBtn = document.createElement("button");
+    playBtn.innerText = "Play";
+
+    track.innerText = tracks.length + 1;
+    track.appendChild(playBtn);
+    track.appendChild(inp);
+    document.querySelector(".tracks").appendChild(track);
+
+    this.assingTracks();
+    this.initSelectingTrack();
   },
   toggleSelectedTrack(e) {
     if (!!this.currentTrack) {
@@ -178,7 +234,9 @@ const app = {
   assingPlayerButton(track) {
     track
       .querySelector("button")
-      .addEventListener("click", (e) => this.playRecording(e));
+      .addEventListener("click", () =>
+        this.playRecording(track.getAttribute("id"))
+      );
   },
 };
 

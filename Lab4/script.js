@@ -86,18 +86,24 @@ class NoteList {
     this.searchText = value;
     const notes = this.notes.filter(
       (note) =>
-        note.title.indexOf(value) !== -1 || note.content.indexOf(value) !== -1
+        note.title.indexOf(value) !== -1 ||
+        note.content.indexOf(value) !== -1 ||
+        note.tags.some((tag) => tag.indexOf(value) !== -1)
     );
-    console.log(notes, "filtered");
     return notes;
   }
 }
 
-const createSubmitBtn = document.getElementById("createNote");
-const editSubmitBtn = document.getElementById("editNote");
+const createNoteBtn = document.getElementById("createNote");
+const saveNoteBtn = document.getElementById("saveNote");
 const remainingNotesContainer = document.getElementById("remainingNotes");
 const doneNotesContainer = document.getElementById("doneNotes");
 const searchInp = document.getElementById("search");
+const modalLabel = document.getElementById("modalLabel");
+
+// class Form {
+
+// }
 
 class App {
   noteList = new NoteList();
@@ -105,20 +111,14 @@ class App {
   currentEditingNote;
 
   initialize() {
-    // document.querySelector("input[type='datetime-local']").min =
-    //   new Date().toISOString();
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
 
     document.getElementById("remindAt").min = now.toISOString().slice(0, 16);
     document.getElementById("remindAt").value = now.toISOString().slice(0, 16);
 
-    createSubmitBtn.addEventListener("click", () => {
-      this.handleCreateNote();
-    });
-    editSubmitBtn.addEventListener("click", () => {
-      this.handleEditNote();
-    });
+    createNoteBtn.onclick = () => this.setNoteDefaultValuesToForm(null);
+    saveNoteBtn.onclick = () => this.handleSubmitNote();
     searchInp.addEventListener("keyup", (e) => {
       this.handleFilteringNote(e);
     });
@@ -126,7 +126,7 @@ class App {
     this.renderNotes();
   }
 
-  handleCreateNote() {
+  getSubmittedValues() {
     const title = document.getElementById("title").value;
     const content = document.getElementById("content").value;
     const color = document.getElementById("color").value;
@@ -143,33 +143,50 @@ class App {
       tags: [tag],
       remindAt: showReminder ? remindAt : null,
     };
+
+    return note;
+  }
+
+  setNoteDefaultValuesToForm(note) {
+    this.currentEditingNote = note;
+
+    if (!!note) {
+      modalLabel.innerText = "Edit note";
+    } else {
+      modalLabel.innerText = "Create note";
+    }
+
+    document.getElementById("title").value = note?.title || "";
+    document.getElementById("content").value = note?.content || "";
+    document.getElementById("color").value = note?.color || "";
+    document.getElementById("tag").value = note?.tags[0] || "";
+    document.getElementById("pin").checked = note?.pin || false;
+    document.getElementById("showReminder").checked = !!note?.remindAt || false;
+    document.getElementById("remindAt").value = note?.remindAt || "";
+  }
+
+  handleSubmitNote() {
+    console.log("sumbitted note");
+    const note = this.getSubmittedValues();
+    if (!!this.currentEditingNote) {
+      this.handleEditNote(note);
+    } else {
+      this.handleCreateNote(note);
+    }
+  }
+
+  handleCreateNote(note) {
     this.noteList.addNote(note);
     this.renderNotes();
   }
 
-  setNoteValuesToEditForm(note) {
-    this.currentEditingNote = note;
-    document.getElementById("editTitle").value = note.title;
-    document.getElementById("editContent").value = note.content;
-    document.getElementById("editColor").value = note.color;
-    document.getElementById("editPin").checked = note.pin;
-  }
-
-  handleEditNote() {
-    const title = document.getElementById("editTitle").value;
-    const content = document.getElementById("editContent").value;
-    const color = document.getElementById("editColor").value;
-    const pin = document.getElementById("editPin").checked;
-
-    const note = {
+  handleEditNote(note) {
+    const updatedNote = {
       ...this.currentEditingNote,
-      title,
-      content,
-      color,
-      pin,
+      ...note,
     };
 
-    this.noteList.editNote(note);
+    this.noteList.editNote(updatedNote);
     this.renderNotes();
   }
 
@@ -189,12 +206,13 @@ class App {
   }
 
   renderNote(note) {
-    const createElement = document.createElement("li");
-    createElement.className = "note p-3";
+    const noteElement = document.createElement("div");
+    noteElement.className = "note p-3";
     const rgbColor = hexToRgb(note.color);
-    createElement.style.background = `rgba(${rgbColor},0.12)`;
+    noteElement.style.borderColor = note.color;
+    noteElement.style.background = `rgba(${rgbColor},0.12)`;
 
-    createElement.innerHTML = `
+    noteElement.innerHTML = `
       <div>
         <h3 class="note-title">${note.title || "-"}</h3>
       </div>
@@ -223,10 +241,19 @@ class App {
     const createEditBtn = document.createElement("button");
     createEditBtn.innerText = "Edit";
     createEditBtn.setAttribute("data-toggle", "modal");
-    createEditBtn.setAttribute("data-target", "#editModal");
+    createEditBtn.setAttribute("data-target", "#modal");
     createEditBtn.addEventListener("click", () =>
-      this.setNoteValuesToEditForm(note)
+      this.setNoteDefaultValuesToForm(note)
     );
+
+    const taskList = document.createElement("ul");
+
+    [{ name: "new", isComplete: true }].forEach((task) => {
+      let li = document.createElement("li");
+      li.innerText = task.name;
+      li.style.textDecorationLine = "line-through";
+      taskList.appendChild(li);
+    });
 
     if (note.remindAt && !this.silentMode) {
       const wait = new Date(note.remindAt).getTime() - Date.now();
@@ -238,13 +265,22 @@ class App {
       }
     }
 
-    createElement.appendChild(createToggleBtn);
-    createElement.appendChild(createDeleteBtn);
-    createElement.appendChild(createEditBtn);
+    noteElement.appendChild(taskList);
+    noteElement.appendChild(createToggleBtn);
+    noteElement.appendChild(createDeleteBtn);
+    noteElement.appendChild(createEditBtn);
     const listContainer = note.isComplete
       ? doneNotesContainer
       : remainingNotesContainer;
-    listContainer.appendChild(createElement);
+    listContainer.appendChild(noteElement);
+  }
+
+  renderTask(task) {
+    let li = document.createElement("li");
+    li.innerText = task.name;
+    li.style.textDecorationLine = task.isComplete ? "line-through" : "none";
+    li.onclick = () => (task.isComplete = !task.isComplete);
+    taskList.appendChild(li);
   }
 
   renderNotes(notes = this.noteList.notes) {

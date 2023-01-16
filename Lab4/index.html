@@ -1,113 +1,248 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
+      crossorigin="anonymous"
+    />
 
-    <link rel="stylesheet" href="./style.css">
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-</head>
+    <link rel="stylesheet" href="./style.css" />
+    <script
+      src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+      integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"
+    ></script>
+  </head>
 
-<body>
+  <body>
     <div class="container flex">
-        <div class="row">
-            <div class="col">
-                <form>
-                    <div class="form-group">
-                        <label for="title">Title</label>
-                        <input type="title" class="form-control" id="title" 
-                            placeholder="Add title">
-                    </div>
-                    <div class="form-group">
-                        <label for="content">Content</label>
-                        <input type="content" class="form-control" id="content" 
-                            placeholder="Add content">
-                    </div>
-                    <div class="form-group">
-                        <label for="color">Color</label>
-                        <input type="color" class="form-control" id="color"
-                            placeholder="Add color">
-                    </div>
-                    <div class="form-group">
-                        <label for="color">Tag</label>
-                        <input type="color" class="form-control" id="tag" 
-                            placeholder="Add tag">
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-pin-input" id="pin">
-                        <label class="form-pin-label" for="pin">Pin note</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-showReminder-input" id="showReminder">
-                        <label class="form-showReminder-label" for="showReminder">Show reminder?</label>
-                    </div>
-                    <div class="form-group">
-                        <label for="remindAt">Remind at</label>
-                        <input type="datetime-local" class="form-control" id="remindAt"
-                            placeholder="Remind at">
-                    </div>
-                    <button type="button" id="createNote" class="btn btn-primary">Submit</button>
-                </form>
+      <div class="row">
+        <div class="col">
+          <!-- <form>
+            <div class="form-group">
+              <label for="title">Title</label>
+              <input
+                type="title"
+                class="form-control"
+                id="title"
+                placeholder="Add title"
+              />
             </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <h1>sd</h1>
-                <div class="form-group mb-2">
-                    <label for="search">search</label>
-                    <input type="search" class="form-control" id="search" aria-describedby="searchHelp"
-                        placeholder="Search note">
-                </div>
-                <div class="row">
-                    <ul id="remainingNotes" class="col list-container">
-                    </ul>
-                    <ul id="doneNotes" class="col list-container">
-                    </ul>
-                </div>
+            <div class="form-group">
+              <label for="content">Content</label>
+              <input
+                type="content"
+                class="form-control"
+                id="content"
+                placeholder="Add content"
+              />
             </div>
-        </div>
-    </div>
-    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <form class="edit-modal-note modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="editModalLabel">Edit note</h5>
+            <div class="row">
+              <div class="col d-flex flex-column form-group">
+                <label for="color">Color</label>
+                <input
+                  type="color"
+                  class="form-control"
+                  id="color"
+                  placeholder="Add color"
+                />
+              </div>
+              <div class="col form-group">
+                <label for="tag">Tag</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="tag"
+                  placeholder="Add tag"
+                />
+              </div>
             </div>
-            <div class="modal-body">
+            <div class="form-check">
+              <input type="checkbox" class="form-pin-input" id="pin" />
+              <label class="form-pin-label" for="pin">Pin note</label>
+            </div>
+            <div class="row">
+              <div class="col">
                 <div class="form-group">
-                    <label for="editTitle">Title</label>
-                    <input type="title" class="form-control" id="editTitle" aria-describedby="titleHelp"
-                        placeholder="Add title">
+                  <label for="remindAt">Remind at</label>
+                  <input
+                    type="datetime-local"
+                    class="form-control"
+                    id="remindAt"
+                    placeholder="Remind at"
+                  />
                 </div>
-                <div class="form-group">
-                    <label for="editContent">Content</label>
-                    <input type="content" class="form-control" id="editContent" aria-describedby="contentHelp"
-                        placeholder="Add content">
-                </div>
-                <div class="form-group">
-                    <label for="color">Color</label>
-                    <input type="color" class="form-control" id="editColor" aria-describedby="colorHelp"
-                        placeholder="Add color">
-                </div>
+              </div>
+              <div class="col">
                 <div class="form-check">
-                    <input type="checkbox" class="form-pin-input" id="editPin">
-                    <label class="form-pin-label" for="pin">Pin note</label>
+                  <input
+                    type="checkbox"
+                    class="form-showReminder-input"
+                    id="showReminder"
+                  />
+                  <label class="form-showReminder-label" for="showReminder"
+                    >Show reminder?</label
+                  >
                 </div>
+              </div>
             </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button id="editNote" type="button" class="btn btn-primary" data-dismiss="modal">Save changes</button>
-            </div>
-          </form>
+
+            <button type="button" id="createNote" class="btn btn-primary">
+              Submit
+            </button>
+          </form> -->
+          <button
+            type="button"
+            id="createNote"
+            class="btn btn-primary"
+            data-toggle="modal"
+            data-target="#modal"
+          >
+            Add note
+          </button>
         </div>
       </div>
+      <div class="row">
+        <div class="col">
+          <h1>sd</h1>
+          <div class="form-group mb-2">
+            <label for="search">search</label>
+            <input
+              type="search"
+              class="form-control"
+              id="search"
+              aria-describedby="searchHelp"
+              placeholder="Search note"
+            />
+          </div>
+          <div class="row">
+            <div id="remainingNotes" class="col list-container"></div>
+            <div id="doneNotes" class="col list-container"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="modal fade"
+      id="modal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="modalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <form class="edit-modal-note modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalLabel">Edit note</h5>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="title">Title</label>
+              <input
+                type="title"
+                class="form-control"
+                id="title"
+                aria-describedby="titleHelp"
+                placeholder="Add title"
+              />
+            </div>
+            <div class="form-group">
+              <label for="content">Content</label>
+              <input
+                type="content"
+                class="form-control"
+                id="content"
+                placeholder="Add content"
+              />
+            </div>
+            <div class="form-group">
+              <label for="color">Color</label>
+              <input
+                type="color"
+                class="form-control"
+                id="color"
+                placeholder="Add color"
+              />
+            </div>
+            <div class="col form-group">
+              <label for="tag">Tag</label>
+              <input
+                type="text"
+                class="form-control"
+                id="tag"
+                placeholder="Add tag"
+              />
+            </div>
+            <div class="form-check">
+              <input type="checkbox" class="form-pin-input" id="pin" />
+              <label class="form-pin-label" for="pin">Pin note</label>
+            </div>
+            <div class="form-check">
+              <input
+                type="checkbox"
+                class="form-showReminder-input"
+                id="showReminder"
+              />
+              <label class="form-showReminder-label" for="showReminder"
+                >Show reminder?</label
+              >
+            </div>
+            <div class="form-group">
+              <label for="remindAt">Remind at</label>
+              <input
+                type="datetime-local"
+                class="form-control"
+                id="remindAt"
+                placeholder="Remind at"
+              />
+            </div>
+            <div class="form-group my-2" id="taskList">
+              <label>Add task to do</label>
+              <button id="addTask" type="button" class="btn btn-primary">
+                Save changes
+              </button>
+            </div>
+            <ul>
+              <li>
+                <input
+                  type="text"
+                  class="taskTodo form-control"
+                  placeholder="New task"
+                />
+              </li>
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+            <button
+              id="saveNote"
+              type="button"
+              class="btn btn-primary"
+              data-dismiss="modal"
+            >
+              Save changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
     <script src="./script.js"></script>
-</body>
-
+  </body>
 </html>
