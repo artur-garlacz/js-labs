@@ -29,79 +29,6 @@
     <div class="container flex">
       <div class="row">
         <div class="col">
-          <!-- <form>
-            <div class="form-group">
-              <label for="title">Title</label>
-              <input
-                type="title"
-                class="form-control"
-                id="title"
-                placeholder="Add title"
-              />
-            </div>
-            <div class="form-group">
-              <label for="content">Content</label>
-              <input
-                type="content"
-                class="form-control"
-                id="content"
-                placeholder="Add content"
-              />
-            </div>
-            <div class="row">
-              <div class="col d-flex flex-column form-group">
-                <label for="color">Color</label>
-                <input
-                  type="color"
-                  class="form-control"
-                  id="color"
-                  placeholder="Add color"
-                />
-              </div>
-              <div class="col form-group">
-                <label for="tag">Tag</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="tag"
-                  placeholder="Add tag"
-                />
-              </div>
-            </div>
-            <div class="form-check">
-              <input type="checkbox" class="form-pin-input" id="pin" />
-              <label class="form-pin-label" for="pin">Pin note</label>
-            </div>
-            <div class="row">
-              <div class="col">
-                <div class="form-group">
-                  <label for="remindAt">Remind at</label>
-                  <input
-                    type="datetime-local"
-                    class="form-control"
-                    id="remindAt"
-                    placeholder="Remind at"
-                  />
-                </div>
-              </div>
-              <div class="col">
-                <div class="form-check">
-                  <input
-                    type="checkbox"
-                    class="form-showReminder-input"
-                    id="showReminder"
-                  />
-                  <label class="form-showReminder-label" for="showReminder"
-                    >Show reminder?</label
-                  >
-                </div>
-              </div>
-            </div>
-
-            <button type="button" id="createNote" class="btn btn-primary">
-              Submit
-            </button>
-          </form> -->
           <button
             type="button"
             id="createNote"
@@ -117,7 +44,7 @@
         <div class="col">
           <h1>sd</h1>
           <div class="form-group mb-2">
-            <label for="search">search</label>
+            <label for="search">Search</label>
             <input
               type="search"
               class="form-control"
@@ -126,8 +53,9 @@
               placeholder="Search note"
             />
           </div>
-          <div class="row">
+          <div>
             <div id="remainingNotes" class="col list-container"></div>
+          </br>
             <div id="doneNotes" class="col list-container"></div>
           </div>
         </div>
@@ -207,19 +135,20 @@
                 placeholder="Remind at"
               />
             </div>
-            <div class="form-group my-2" id="taskList">
+            <div class="form-group my-2">
               <label>Add task to do</label>
               <button id="addTask" type="button" class="btn btn-primary">
-                Save changes
+                Add field
               </button>
             </div>
-            <ul>
-              <li>
+            <ul id="taskList" class="p-3">
+              <li class="d-flex mb-2">
                 <input
                   type="text"
-                  class="taskTodo form-control"
+                  class="task form-control"
                   placeholder="New task"
                 />
+                <button type="button" class="">x</button>
               </li>
             </ul>
           </div>
