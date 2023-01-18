@@ -69,14 +69,17 @@
       aria-labelledby="editModalLabel"
       aria-hidden="true"
     >
-      <div class="modal-dialog" role="document">
+      <div class="modal-dialog modal-xl" role="document">
         <form class="weather-details modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="editModalLabel">Weather details</h5>
           </div>
-          <div class="modal-body">sdsd</div>
+          <div class="modal-body">
+            <canvas id="weather-chart"></canvas>
+          </div>
           <div class="modal-footer">
             <button
+              id="close-modal"
               type="button"
               class="btn btn-secondary"
               data-dismiss="modal"
@@ -87,8 +90,8 @@
         </form>
       </div>
     </div>
-    <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDwQl8QdFAuyJF3KGe1wcju_Ozl1_lVDuY"></script> -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDw6cRMC4psyblPXZ5P6eA9vF17oZ_qVXI&libraries=places"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="./script.js"></script>
   </body>

@@ -117,14 +117,11 @@ const _viewModel = {
     });
   },
   async renderWeatherChart(place) {
-    console.log(place);
-    const currDate = Date.now();
-    const startDate = currDate - 12 * 1000 * 3600;
-    const data = await this.fetchHistoricalWeather(place.city, place.country, {
-      start: startDate,
-      end: currDate,
-    });
-    console.log(data, "data");
+    const data = await this.fetchForecastWeather(place.city, place.country);
+
+    if (data.cod !== "200") return;
+
+    weatherChart.createWeatherChart(data.list);
   },
   async getWeatherForFavPlaces(cb) {
     if (!this.favPlaces.length) return;
@@ -175,9 +172,9 @@ const _viewModel = {
     );
     return weather.json();
   },
-  async fetchHistoricalWeather(city, country, { start, end }) {
+  async fetchForecastWeather(city, country) {
     const weather = await fetch(
-      `https://history.openweathermap.org/data/2.5/history/city?q=${city},${country}&type=hour&start=${start}&end=${end}&appid=${API_KEY}`
+      `https://api.openweathermap.org/data/2.5/forecast?q=${city},${country}&appid=${API_KEY}&units=metric`
     );
     return weather.json();
   },
@@ -208,6 +205,71 @@ const _viewModel = {
   },
   getChangeBackground(value = "Clouds") {
     return weatherBackground[value];
+  },
+};
+
+const weatherChart = {
+  createWeatherChart(data) {
+    const weatherChartElement = document
+      .getElementById("weather-chart")
+      .getContext("2d");
+
+    const weathers = this.getPreparedData(data);
+    console.log(weathers);
+    const { min, max, main } = this.getGroupedTempData(weathers);
+
+    const chart = new Chart(weatherChartElement, {
+      type: "line",
+      title: "ss",
+      data: {
+        labels: this.getDataLabels(weathers),
+        datasets: [
+          {
+            label: "Min temp.",
+            data: min,
+            borderWidth: 1,
+          },
+          {
+            label: "Main temp.",
+            data: main,
+            borderWidth: 1,
+          },
+          {
+            label: "Max temp.",
+            data: max,
+            borderWidth: 1,
+          },
+        ],
+      },
+    });
+
+    document.getElementById("close-modal").onclick = () => chart.destroy();
+  },
+  getGroupedTempData(data) {
+    const groupedData = data.reduce(
+      (prev, curr) => {
+        const { temp_min, temp_max, temp } = curr.main;
+        console.log(prev);
+        return {
+          min: [...prev.min, temp_min],
+          max: [...prev.max, temp_max],
+          main: [...prev.main, temp],
+        };
+      },
+      { min: [], max: [], main: [] }
+    );
+    console.log(groupedData);
+    return groupedData;
+  },
+  getPreparedData(data) {
+    const preparedData = data.filter((_, idx) => idx % 8 === 0);
+    return preparedData;
+  },
+  getDataLabels(data) {
+    const labels = data.map((weather) =>
+      new Date(weather.dt * 1000).toDateString()
+    );
+    return labels;
   },
 };
 
