@@ -20,7 +20,8 @@ const uuidv4 = () => {
 const _viewModel = {
   input: document.getElementById("city-input"),
   favPlaces: JSON.parse(localStorage.getItem("favPlaces")) || [],
-  historicalWeathers: localStorage.getItem("favPlaces") || [],
+  prevSearches: JSON.parse(localStorage.getItem("prevSearches")) || [],
+  currWeather: null,
   refFetchInterval: null,
   setView() {
     document
@@ -34,8 +35,15 @@ const _viewModel = {
     const input = document.getElementById("search-input");
     new google.maps.places.Autocomplete(input, options);
 
+    // favourite places
     this.renderFavPlaces();
     this.setReFetchInterval();
+
+    // previous searches
+    this.renderPrevSearchedWeathers();
+
+    // default current weather from previous searches
+    this.renderDefaultWeather();
   },
   setReFetchInterval() {
     this.refFetchInterval = setInterval(() => {
@@ -44,8 +52,14 @@ const _viewModel = {
     }, 3600000);
   },
   renderFavPlaces() {
-    this.getWeatherForFavPlaces((favPlaces) =>
-      this.createFavPlacesWeather(favPlaces)
+    if (!this.favPlaces.length) {
+      document.getElementById("fav-weather-list").innerHTML = "";
+      return;
+    }
+
+    this.getWeatherForPlaces(
+      (favPlaces) => this.createFavPlacesWeather(favPlaces),
+      this.favPlaces
     );
   },
   createWeatherCard(weather, place, isFav = true) {
@@ -57,7 +71,7 @@ const _viewModel = {
     item.style.backgroundColor = this.getChangeBackground(main);
 
     const content = document.createElement("div");
-    content.innerHTML = `<h1>${weather.name}</h1>
+    content.innerHTML = `<h1 class="text-overflow">${weather.name}</h1>
     <h2 class="date" id="title-date"></h2>
     <div class="weatherIcon">
       <div class="sunny">
@@ -66,7 +80,7 @@ const _viewModel = {
         </div>
       </div>
     </div>
-    <p class="temp"><strong>${temp}</strong></p>
+    <p class="temp title"><strong>${temp}</strong></p>
     <p class="conditions">${main}</p>
     <p class="tempRange m-0">
       <span class="high">${temp_max}</span> | <span class="low">${temp_min}</span>
@@ -108,6 +122,7 @@ const _viewModel = {
     return item;
   },
   createFavPlacesWeather(favPlaces) {
+    console.log("render", favPlaces);
     const container = document.getElementById("fav-weather-list");
     container.innerHTML = "";
     console.log(favPlaces);
@@ -123,10 +138,10 @@ const _viewModel = {
 
     weatherChart.createWeatherChart(data.list);
   },
-  async getWeatherForFavPlaces(cb) {
-    if (!this.favPlaces.length) return;
+  async getWeatherForPlaces(cb, places) {
+    if (!places.length) return;
 
-    const reqs = this.favPlaces.map((place) =>
+    const reqs = places.map((place) =>
       this.fetchWeather(place.city, place.country)
     );
 
@@ -141,6 +156,12 @@ const _viewModel = {
   },
   addFavPlace(place) {
     if (this.favPlaces.length === 10) return;
+
+    const placeExists = this.favPlaces.some(
+      (favPlace) => favPlace.id === place.id
+    );
+
+    if (placeExists) return;
 
     this.favPlaces.push(place);
     localStorage.setItem("favPlaces", JSON.stringify(this.favPlaces));
@@ -198,10 +219,66 @@ const _viewModel = {
         country: data.sys.country,
         id: uuidv4(),
       };
+
+      this.currWeather = data;
+
+      this.addPlaceToPrevSearches(place);
       searchedWeather.appendChild(this.createWeatherCard(data, place, false));
     } else {
       alert("City not found");
     }
+  },
+  async renderDefaultWeather() {
+    const searchedWeather = document.getElementById("searched-weather");
+
+    const currPlace = this.prevSearches.at(-1);
+    if (!currPlace) return;
+
+    searchedWeather.innerHTML = "";
+    const { city, country } = currPlace;
+
+    const weather = await this.fetchWeather(city, country);
+
+    searchedWeather.appendChild(
+      this.createWeatherCard(weather, currPlace, false)
+    );
+  },
+  addPlaceToPrevSearches(place) {
+    const placeExists = this.prevSearches.some((prev) => prev.id === place.id);
+    if (placeExists) return;
+
+    this.prevSearches.push(place);
+    localStorage.setItem("prevSearches", JSON.stringify(this.prevSearches));
+
+    this.renderPrevSearchedWeathers();
+  },
+  renderPrevSearchedWeathers() {
+    if (!this.prevSearches.length) {
+      document.getElementById("prev-searches").innerHTML = "";
+      return;
+    }
+
+    this.getWeatherForPlaces(
+      (weathers) => this.createPrevSearchedWeathers(weathers),
+      [...this.prevSearches].reverse()
+    );
+  },
+  createPrevSearchedWeathers(weathers) {
+    const container = document.getElementById("prev-searches");
+    container.innerHTML = "";
+
+    if (!weathers.length) return;
+
+    weathers.forEach((weather) =>
+      this.createPrevSearchedWeather(weather, container)
+    );
+  },
+  createPrevSearchedWeather(weather, container) {
+    const { humidity, pressure, temp, temp_max, temp_min } = weather.main;
+
+    const item = document.createElement("li");
+    item.innerHTML = `<p>${weather.name} | <span class="temp">${temp} </span></p>`;
+    container.appendChild(item);
   },
   getChangeBackground(value = "Clouds") {
     return weatherBackground[value];
@@ -220,7 +297,6 @@ const weatherChart = {
 
     const chart = new Chart(weatherChartElement, {
       type: "line",
-      title: "ss",
       data: {
         labels: this.getDataLabels(weathers),
         datasets: [
