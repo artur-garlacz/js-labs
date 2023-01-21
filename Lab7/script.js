@@ -101,6 +101,7 @@ const _viewModel = {
       content.appendChild(deleteBtn);
     } else {
       const addFavBtn = document.createElement("button");
+      addFavBtn.className = "card-action-btn";
       addFavBtn.innerText = "Add to favouites";
 
       const currPlaceIsFav = this.favPlaces.some(
@@ -113,6 +114,7 @@ const _viewModel = {
 
     const detailsBtn = document.createElement("button");
     detailsBtn.innerText = "Show details";
+    detailsBtn.className = "card-action-btn";
     detailsBtn.setAttribute("data-toggle", "modal");
     detailsBtn.setAttribute("data-target", "#editModal");
     detailsBtn.addEventListener("click", () => this.renderWeatherChart(place));
@@ -155,7 +157,10 @@ const _viewModel = {
       });
   },
   addFavPlace(place) {
-    if (this.favPlaces.length === 10) return;
+    if (this.favPlaces.length === 10){
+      alert("You already have 10 favourite places");
+      return;
+    };
 
     const placeExists = this.favPlaces.some(
       (favPlace) => favPlace.id === place.id
@@ -352,10 +357,11 @@ const weatherChart = {
 const weatherBackground = {
   Thunderstorm: "#000000",
   Rain: "#3C424C",
-  Snow: "#EDEFF3",
+  Snow: "#d2d3d6",
   Clouds: "#979999",
   Clear: "#86B9E0",
   Fog: "#B8B8B8",
   Drizzle: "#B8B8B8",
   Mist: "#CDD8D9",
+  Smoke: "#747780",
 };

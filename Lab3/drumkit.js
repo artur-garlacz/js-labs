@@ -94,6 +94,7 @@ const app = {
     const player = document.querySelector(playerId);
     player.setAttribute("src", `./sounds/${sound}.wav`);
     this.addSoundToRecording(sound);
+    console.log(sound)
     // this.playSound(player);
     playSound(`./sounds/${sound}.wav`);
   },
@@ -149,24 +150,7 @@ const app = {
     const playlist = this.trackRecordings[currentTrack];
     // this.setPlayer(sound, `#${this.currentTrack}-player`);
     console.log("SOUND");
-    // playSound(`./sounds/${sound}.wav`);
-
-    let i = 0;
-
-    // audio.addEventListener(
-    //   "ended",
-    //   function () {
-    //     console.log(i, playlist, playlist[i]);
-
-    //     if (++i === playlist.length) {
-    //       audio.pause();
-    //     }
-    //     audio.src = `./sounds/${playlist[i]}.wav`;
-    //     audio.play();
-    //   },
-    //   true
-    // );
-    // audo.volume = 0.3;
+    
     let delayTime = 0;
     playlist.forEach(({ sound, startTime }, idx) => {
       delayTime +=
@@ -180,13 +164,6 @@ const app = {
         playSound(`./sounds/${sound}.wav`);
       }, delayTime);
     });
-
-    // playSound(`./sounds/${playlist[0]}.wav`).then(() => {
-    //   console.log(i, playlist, playlist[i]);
-
-    //   i = ++i < playlist.length ? i : 0;
-    //   playSound(`./sounds/${playlist[i]}.wav`);
-    // });
   },
   assingTracks() {
     const tracks = document.getElementsByClassName("track");
@@ -232,12 +209,22 @@ const app = {
     e.target.classList.add("track-active");
   },
   assingPlayerButton(track) {
+    const trackId = track.getAttribute("id");
     track
-      .querySelector("button")
+      .querySelector("button.play-btn")
       .addEventListener("click", () =>
-        this.playRecording(track.getAttribute("id"))
+        this.playRecording(trackId)
+      );
+    
+    track
+      .querySelector("button.clear-btn")
+      .addEventListener("click", () =>
+        this.clearTrackRecording(trackId)
       );
   },
+  clearTrackRecording(trackId){
+    this.trackRecordings[trackId] = [];
+  }
 };
 
 app.init();

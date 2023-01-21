@@ -1,11 +1,8 @@
 const slider = document.getElementById("slider"),
+  pointers = document.getElementById("pointers"),
   sliderItems = document.getElementById("slides"),
   prev = document.getElementById("prev"),
   next = document.getElementById("next");
-
-function createItems() {
-  const items = ["e"];
-}
 
 function slide(wrapper, items, prev, next) {
   let posX1 = 0,
@@ -28,6 +25,8 @@ function slide(wrapper, items, prev, next) {
   items.insertBefore(cloneLast, firstSlide);
   wrapper.classList.add("loaded");
 
+  createPointers();
+
   // Mouse events
   items.onmousedown = dragStart;
 
@@ -46,6 +45,15 @@ function slide(wrapper, items, prev, next) {
 
   // Transition events
   items.addEventListener("transitionend", checkIndex);
+
+  function createPointers(){
+    [...new Array(slidesLength)].forEach(()=> {
+        let pointer = document.createElement("span");
+        pointer.className = "pointer";
+        pointer.onclick = () => shiftSlide(1);
+        pointers.appendChild(pointer);
+    })
+  }
 
   function dragStart(e) {
     e = e || window.event;
