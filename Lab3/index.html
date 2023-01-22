@@ -35,10 +35,20 @@
           <button class="clear-btn">Clear</button>
         </div>
       </div>
-      <button id="playAllTracks">Play all tracks</button>
-      <button id="playSelectedTracks">Play selected tracks</button>
-      <button id="createTrack">Create track</button>
-      <audio hidden controls id="player"></audio>
+      <div class="actions">
+        <button id="playAllTracks" class="action-btn">Play all tracks</button>
+        <button id="playSelectedTracks" class="action-btn">Play selected tracks</button>
+        <button id="createTrack" class="action-btn">Create track</button>
+
+        <div>
+          <span>
+          Metronome:
+          </span>
+          <button id="turnOnMetronome" class="action-btn">ON</button>
+          <input id="metronomeBpm" min="1" value="60" type="number" placeholder="Set bpm to play metronome" />
+          <button id="turnOffMetronome" class="action-btn">OFF</button>
+        </div>
+      </div>
     </div>
     <script src="drumkit.js"></script>
   </body>

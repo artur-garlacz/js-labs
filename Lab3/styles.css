@@ -1,6 +1,9 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+
 body{
     margin: 0;
     padding: 0;
+    font-family: 'Roboto', sans-serif;
 }
 
 .tracks{
@@ -20,9 +23,45 @@ body{
 .track:hover{
     background-color: #9c9c9c;
     cursor: pointer;
-    transition: 0.1s;
+    transition: 0.3s;
 }
 
 .track-active{
     background-color: #6e6e6e;
 }
+
+.actions{
+    display: inline-flex;
+    padding: 1rem;
+    gap: 1rem;
+}
+
+.action-btn{
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 6px 10px;
+    background-color: #9c9c9c;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.action-btn:hover{
+    background-color: #c2c2c2;
+}
+
+#metronomeBpm{
+    border-radius: 4px;
+    height: 1.5rem;
+}
+
+#turnOnMetronome{
+    background-color: #0048cf;
+    color: #ffffff;
+}
+
+#turnOffMetronome{
+    background-color: #cf0000;
+    color: #ffffff;
+}
+

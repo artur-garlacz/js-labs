@@ -42,8 +42,11 @@ const chars = [
 const playAllTracksBtn = document.getElementById("playAllTracks");
 const playSelectedTracksBtn = document.getElementById("playSelectedTracks");
 const createTrackBtn = document.getElementById("createTrack");
+const turnOnMetronomeBtn = document.getElementById("turnOnMetronome");
+const turnOffMetronomeBtn = document.getElementById("turnOffMetronome");
+const metronomeBpm = document.getElementById("metronomeBpm");
 
-function playSound(url) {
+function playSound(url, options) {
   return new Promise(function (resolve, reject) {
     console.log("audio");
 
@@ -78,6 +81,7 @@ const app = {
   currentTrack: null,
   selectedTracks: [],
   trackRecordings: {},
+  metronome: null,
   init() {
     document.addEventListener("keypress", (e) => this.onKeyPress(e));
     this.assingTracks();
@@ -85,33 +89,19 @@ const app = {
     playAllTracksBtn.onclick = () => this.playAllRecordings();
     playSelectedTracksBtn.onclick = () => this.playSelectedRecordings();
     createTrackBtn.onclick = () => this.createTrack();
+    turnOnMetronomeBtn.onclick = () => this.turnOnMetronome();
+    turnOffMetronomeBtn.onclick = () => this.turnOffMetronome();
   },
   onKeyPress(event) {
     const sound = KeyToSound[event.key];
+    if (!sound) return;
+
     this.setPlayer(sound);
   },
-  setPlayer(sound, playerId = "#player") {
-    const player = document.querySelector(playerId);
-    player.setAttribute("src", `./sounds/${sound}.wav`);
+  setPlayer(sound) {
     this.addSoundToRecording(sound);
-    console.log(sound)
-    // this.playSound(player);
     playSound(`./sounds/${sound}.wav`);
   },
-  // playSound(sound) {
-  //   sound.currentTime = 0;
-  //   const playPromise = sound.play();
-
-  //   console.log(sound, playPromise);
-
-  //   if (playPromise != undefined) {
-  //     playPromise
-  //       .then(() => {
-  //         sound.pause();
-  //       })
-  //       .catch((err) => console.log(err));
-  //   }
-  // },
   addSoundToRecording(sound) {
     if (!this.currentTrack) return;
 
@@ -125,9 +115,9 @@ const app = {
   },
   initSelectingTrack() {
     document.querySelectorAll(".track").forEach((track) => {
-      track.querySelector("input").addEventListener("click", (e) => {
+      track.querySelector("input").onclick = () => {
         this.selectedTracks.push(track.getAttribute("id"));
-      });
+      };
     });
   },
   playAllRecordings() {
@@ -148,19 +138,12 @@ const app = {
     if (!currentTrack || !this.trackRecordings[currentTrack].length) return;
 
     const playlist = this.trackRecordings[currentTrack];
-    // this.setPlayer(sound, `#${this.currentTrack}-player`);
-    console.log("SOUND");
-    
+
     let delayTime = 0;
     playlist.forEach(({ sound, startTime }, idx) => {
       delayTime +=
         idx === 0 ? delayTime : startTime - playlist[idx - 1].startTime;
       setTimeout(() => {
-        // const audio = new Audio();
-        // audio.loop = false;
-        // audio.src = `./sounds/${sound}.wav`;
-        // console.log(audio, audio.src);
-        // audio.play();
         playSound(`./sounds/${sound}.wav`);
       }, delayTime);
     });
@@ -188,11 +171,17 @@ const app = {
     inp.setAttribute("type", "checkbox");
 
     const playBtn = document.createElement("button");
+    playBtn.className = "play-btn";
     playBtn.innerText = "Play";
+
+    const cleanBtn = document.createElement("button");
+    cleanBtn.className = "clear-btn";
+    cleanBtn.innerText = "Clear";
 
     track.innerText = tracks.length + 1;
     track.appendChild(playBtn);
     track.appendChild(inp);
+    track.appendChild(cleanBtn);
     document.querySelector(".tracks").appendChild(track);
 
     this.assingTracks();
@@ -212,19 +201,30 @@ const app = {
     const trackId = track.getAttribute("id");
     track
       .querySelector("button.play-btn")
-      .addEventListener("click", () =>
-        this.playRecording(trackId)
-      );
-    
+      .addEventListener("click", () => this.playRecording(trackId));
+
     track
       .querySelector("button.clear-btn")
-      .addEventListener("click", () =>
-        this.clearTrackRecording(trackId)
-      );
+      .addEventListener("click", () => this.clearTrackRecording(trackId));
   },
-  clearTrackRecording(trackId){
+  clearTrackRecording(trackId) {
     this.trackRecordings[trackId] = [];
-  }
+  },
+  turnOnMetronome() {
+    const bpm = metronomeBpm.value;
+    if (!bpm) return;
+    const delay = 60000 / parseInt(bpm);
+    console.log(delay, bpm);
+
+    if (this.metronome) {
+      clearInterval(this.metronome);
+    }
+
+    this.metronome = setInterval(() => playSound("./sounds/tink.wav"), delay);
+  },
+  turnOffMetronome() {
+    clearInterval(this.metronome);
+  },
 };
 
 app.init();
