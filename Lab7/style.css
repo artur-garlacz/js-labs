@@ -82,12 +82,12 @@ button {
   cursor: pointer;
 }
 
-.text-overflow{
+.text-overflow {
   text-overflow: ellipsis;
   overflow: hidden;
 }
 
-.title{
+.title {
   font-size: 2.7em;
   line-height: 1.3;
 }
@@ -109,8 +109,9 @@ button {
 
 .form-search-input {
   border: 3px solid #d96c06;
+  border-right: 0;
   border-radius: 12px 0 0 12px;
-  width: 60%;
+  width: 100%;
   padding: 6px 10px;
   font-size: 18px;
 }
@@ -121,4 +122,20 @@ button {
   padding: 6px 10px;
   background-color: #d96c06;
   color: #ffffff;
+}
+
+#search-box {
+  display: none;
+  position: absolute;
+  z-index: 100;
+  min-height: 200px;
+  background-color: #fff;
+  width: 100%;
+  border-radius: 0 0 12px 12px;
+  /* box-shadow: 1px 16px 28px -7px rgba(163, 163, 163, 1); */
+  box-shadow: 3px 16px 38px -7px rgba(140, 140, 140, 1);
+}
+
+#search-box.active {
+  display: block;
 }

@@ -17,8 +17,17 @@ const uuidv4 = () => {
   );
 };
 
+const debounce = (func, timeout = 300) => {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      func.apply(this, args);
+    }, timeout);
+  };
+};
+
 const _viewModel = {
-  input: document.getElementById("city-input"),
   favPlaces: JSON.parse(localStorage.getItem("favPlaces")) || [],
   prevSearches: JSON.parse(localStorage.getItem("prevSearches")) || [],
   currWeather: null,
@@ -28,12 +37,18 @@ const _viewModel = {
       .querySelector(".form-search-btn")
       .addEventListener("click", () => this.fetchWeatherDataFromUser());
 
-    const options = {
-      types: ["(cities)"],
-    };
+    document
+      .getElementById("search-input")
+      .addEventListener("keyup", (e) => debounce(this.assignSearchBox(e)));
 
-    const input = document.getElementById("search-input");
-    new google.maps.places.Autocomplete(input, options);
+    window.addEventListener("click", ({ target }) => {
+      const popup = target.closest("#search-box");
+      const searchBox = document.getElementById("search-box");
+      const clickedOutsidePopup =
+        !popup && searchBox.classList.contains("active");
+
+      if (clickedOutsidePopup) searchBox.classList.remove("active");
+    });
 
     // favourite places
     this.renderFavPlaces();
@@ -157,10 +172,10 @@ const _viewModel = {
       });
   },
   addFavPlace(place) {
-    if (this.favPlaces.length === 10){
+    if (this.favPlaces.length === 10) {
       alert("You already have 10 favourite places");
       return;
-    };
+    }
 
     const placeExists = this.favPlaces.some(
       (favPlace) => favPlace.id === place.id
@@ -284,6 +299,36 @@ const _viewModel = {
     const item = document.createElement("li");
     item.innerHTML = `<p>${weather.name} | <span class="temp">${temp} </span></p>`;
     container.appendChild(item);
+  },
+  async assignSearchBox(e) {
+    const { value } = e.target;
+    console.log(value);
+    const options = await this.fetchSearchOptions(value);
+
+    this.renderSearchOptions(options);
+  },
+  async fetchSearchOptions(city) {
+    const options = await fetch(
+      `http://geodb-free-service.wirefreethought.com/v1/geo/cities?limit=5&offset=0&namePrefix=${city}`
+    );
+    console.log("options", options);
+    return options.json();
+  },
+  async renderSearchOptions(options) {
+    console.log(options);
+    const searchBox = document.getElementById("search-box");
+    searchBox.innerHTML = "";
+
+    searchBox.classList.add("active");
+
+    options.data.forEach((option) => {
+      console.log(option);
+      const li = document.createElement("li");
+      li.innerText = option.city;
+      li.onclick = () =>
+        (document.getElementById("search-input").value = option.city);
+      searchBox.appendChild(li);
+    });
   },
   getChangeBackground(value = "Clouds") {
     return weatherBackground[value];
