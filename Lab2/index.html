@@ -2,56 +2,49 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Image slider with multi control |</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="./style.css" />
+
+    <title>Slider</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
   </head>
   <body>
-    <!-- partial:index.partial.html -->
-    <html lang="en">
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-
-        <link
-          href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
-          rel="stylesheet"
-        />
-        <link rel="stylesheet" href="./style.css" />
-
-        <title>Slider</title>
-      </head>
-      <body>
-        <div id="slider" class="slider">
-          <div class="wrapper">
-            <div id="slides" class="slides">
-              <span class="slide"
-                ><img src="./images/french-bulldog.jpg"
-              /></span>
-              <span class="slide"
-                ><iframe
-                  width="100%"
-                  height="100%"
-                  src="https://www.youtube.com/embed/tgbNymZ7vqY"
-                >
-                </iframe
-              ></span>
-              <span class="slide"><img src="./images/shih-tzu.jpg" /></span>
-              <span class="slide"><img src="./images/pug.jpg" /></span>
-              <span class="slide"><img src="./images/cavalier.jpg" /></span>
-            </div>
-            <div id="pointers"></div>
-            <span>
-              <i></i>
-            </span>
-          </div>
-          <a id="prev" class="control prev"></a>
-          <a id="next" class="control next"></a>
-          <span id="toggle-shifting">Stop</span>
+    <div id="slider" class="slider">
+      <div class="wrapper">
+        <div id="slides" class="slides">
+          <span class="slide"><img src="./images/french-bulldog.jpg" /></span>
+          <span class="slide"
+            ><iframe
+              width="100%"
+              height="100%"
+              src="https://www.youtube.com/embed/tgbNymZ7vqY"
+            >
+            </iframe
+          ></span>
+          <span class="slide"><img src="./images/shih-tzu.jpg" /></span>
+          <span class="slide"><img src="./images/pug.jpg" /></span>
+          <span class="slide"><img src="./images/cavalier.jpg" /></span>
         </div>
+        <div id="pointers"></div>
+        <span>
+          <i></i>
+        </span>
+      </div>
+      <a id="prev" class="control prev"></a>
+      <a id="next" class="control next"></a>
+      <span id="toggle-shifting">PLAY</span>
+    </div>
 
-        <script src="script.js"></script>
-      </body>
-    </html>
+    <script src="script.js"></script>
   </body>
 </html>

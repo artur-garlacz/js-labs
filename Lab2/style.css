@@ -6,7 +6,6 @@
 
 body {
   height: 100%;
-  background-color: #7656d6;
   color: #333;
   font-family: "Roboto", sans-serif;
   text-align: center;
@@ -114,4 +113,23 @@ body {
 
 .pointer.active {
   background-color: rgb(230, 224, 224);
+}
+
+#toggle-shifting {
+  position: absolute;
+  bottom: 40px;
+  right: 0px;
+  color: #333;
+  background-color: rgba(255, 255, 255, 0.5);
+  z-index: 51;
+  border-radius: 12px 0 0 12px;
+  height: 30px;
+  width: auto;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
 }
