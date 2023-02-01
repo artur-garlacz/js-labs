@@ -1,12 +1,8 @@
-//LAB 7
 const API_KEY = "d7818ca22a941ac71e9f35b02762b407";
-// const GOOGLE_API_KEY = "AIzaSyDw6cRMC4psyblPXZ5P6eA9vF17oZ_qVXI";
 
 document.addEventListener("DOMContentLoaded", () => {
   _viewModel.setView();
 });
-
-// AIzaSyDw6cRMC4psyblPXZ5P6eA9vF17oZ_qVXI;
 
 const uuidv4 = () => {
   return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
@@ -15,16 +11,6 @@ const uuidv4 = () => {
       (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
     ).toString(16)
   );
-};
-
-const debounce = (func, timeout = 300) => {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      func.apply(this, args);
-    }, timeout);
-  };
 };
 
 const _viewModel = {
@@ -37,9 +23,16 @@ const _viewModel = {
       .querySelector(".form-search-btn")
       .addEventListener("click", () => this.fetchWeatherDataFromUser());
 
-    document
-      .getElementById("search-input")
-      .addEventListener("keyup", (e) => debounce(this.assignSearchBox(e)));
+    let timeout;
+
+    document.getElementById("search-input").addEventListener(
+      "keyup",
+      (e) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => this.assignSearchBox(e), 200);
+      },
+      300
+    );
 
     window.addEventListener("click", ({ target }) => {
       const popup = target.closest("#search-box");
@@ -302,7 +295,7 @@ const _viewModel = {
   },
   async assignSearchBox(e) {
     const { value } = e.target;
-    console.log(value);
+
     const options = await this.fetchSearchOptions(value);
 
     this.renderSearchOptions(options);
@@ -311,20 +304,18 @@ const _viewModel = {
     const options = await fetch(
       `http://geodb-free-service.wirefreethought.com/v1/geo/cities?limit=5&offset=0&namePrefix=${city}`
     );
-    console.log("options", options);
     return options.json();
   },
   async renderSearchOptions(options) {
-    console.log(options);
     const searchBox = document.getElementById("search-box");
     searchBox.innerHTML = "";
 
     searchBox.classList.add("active");
 
     options.data.forEach((option) => {
-      console.log(option);
       const li = document.createElement("li");
       li.innerText = option.city;
+      li.className = "search-option";
       li.onclick = () =>
         (document.getElementById("search-input").value = option.city);
       searchBox.appendChild(li);

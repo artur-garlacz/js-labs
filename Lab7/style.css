@@ -16,7 +16,6 @@ html,
 body {
   height: 100vh;
   width: 100%;
-  /* background: #86b9e0; */
 }
 
 body {
@@ -77,6 +76,13 @@ a:hover {
   cursor: pointer;
 }
 
+.card-action-btn {
+  background: transparent;
+  font-weight: 600;
+  padding: 4px;
+  color: #ffffff;
+}
+
 button {
   border: none;
   cursor: pointer;
@@ -128,14 +134,24 @@ button {
   display: none;
   position: absolute;
   z-index: 100;
-  min-height: 200px;
   background-color: #fff;
   width: 100%;
   border-radius: 0 0 12px 12px;
-  /* box-shadow: 1px 16px 28px -7px rgba(163, 163, 163, 1); */
+  list-style: none;
+  padding: 0;
   box-shadow: 3px 16px 38px -7px rgba(140, 140, 140, 1);
+  overflow: hidden;
 }
 
 #search-box.active {
   display: block;
+}
+
+.search-option {
+  padding: 8px;
+}
+
+.search-option:hover {
+  background-color: #e0e0e0;
+  cursor: pointer;
 }
