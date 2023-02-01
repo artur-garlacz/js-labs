@@ -19,3 +19,15 @@ ul {
   font-size: 18px;
   margin-bottom: 0;
 }
+
+.note-tag {
+  border-radius: 8px;
+  padding: 2px 8px;
+  background-color: #fff;
+}
+
+.list-container {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}

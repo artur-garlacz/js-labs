@@ -148,7 +148,8 @@ class Form {
       color,
       pin,
       tags: [tag],
-      remindAt: showReminder ? remindAt : null,
+      remindAt: remindAt,
+      showReminder,
       tasks,
     };
 
@@ -173,11 +174,12 @@ class Form {
     document.getElementById("color").value = note?.color || "";
     document.getElementById("tag").value = note?.tags[0] || "";
     document.getElementById("pin").checked = note?.pin || false;
-    document.getElementById("showReminder").checked = !!note?.remindAt || false;
+    document.getElementById("showReminder").checked =
+      note?.showReminder || false;
     document.getElementById("remindAt").value = note?.remindAt || "";
 
-    if (!!note && !!note.tasks.length) {
-      taskList.innerHTML = "";
+    taskList.innerHTML = "";
+    if (!!note?.tasks && !!note?.tasks.length) {
       note.tasks.forEach((task) => {
         this.addNewTaskField(task.name);
       });
@@ -222,7 +224,7 @@ class App {
   silentMode = false;
   currentEditingNote;
 
-  initialize() {
+  init() {
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
 
@@ -239,7 +241,6 @@ class App {
   }
 
   handleSubmitNote() {
-    console.log("sumbitted note");
     const note = this.form.getSubmittedValues();
     if (!!this.form.currentEditingNote) {
       this.handleEditNote(note);
@@ -294,17 +295,21 @@ class App {
 
     noteElement.innerHTML = `
       <div>
-        <h3 class="note-title">${note.title || "-"}</h3>
-      </div>
-      <p class="m-0">${note.content || "-"}</p>
+        <h3 class="note-title">${note.title || "-"} ${
+      !!note.pin ? '<i class="fa fa-bookmark"></i>' : ""
+    }</h3>
+        
+        </div>
+      <p class="my-2">${note.content || "-"}</p>
       <div class="d-flex justify-content-between w-100">
-        <p class="m-0">${note.tags?.map((tag) => tag) || "-"}</p></br>
+        <p class="m-0 note-tag">${note.tags?.map((tag) => tag) || "-"}</p></br>
         <p class="m-0">${new Date(note.createdAt).toDateString() || "-"}</p>
       </div>
     `;
 
     // toggle action
     const createToggleBtn = document.createElement("button");
+    createToggleBtn.className = "btn";
     createToggleBtn.innerText = note.isComplete ? "Move to do" : "Mark as done";
     createToggleBtn.addEventListener("click", () =>
       this.handleToggleNote(note.id)
@@ -313,6 +318,7 @@ class App {
     // delete action
     const createDeleteBtn = document.createElement("button");
     createDeleteBtn.innerText = "Delete";
+    createDeleteBtn.className = "btn";
     createDeleteBtn.addEventListener("click", () =>
       this.handleDeleteNote(note.id)
     );
@@ -320,19 +326,20 @@ class App {
     // edit action
     const createEditBtn = document.createElement("button");
     createEditBtn.innerText = "Edit";
+    createEditBtn.className = "btn";
     createEditBtn.setAttribute("data-toggle", "modal");
     createEditBtn.setAttribute("data-target", "#modal");
     createEditBtn.addEventListener("click", () =>
       this.form.setNoteDefaultValuesToForm(note)
     );
 
-    const taskList = document.createElement("ul");
-    taskList.className = "p-3";
-
     if (!!note?.tasks?.length) {
+      const taskList = document.createElement("ul");
+      taskList.className = "p-3";
       note.tasks?.forEach((task) => {
         taskList.appendChild(this.getRenderedTask(note.id, task));
       });
+      noteElement.appendChild(taskList);
     }
 
     if (note.remindAt && !this.silentMode) {
@@ -345,7 +352,6 @@ class App {
       }
     }
 
-    noteElement.appendChild(taskList);
     noteElement.appendChild(createToggleBtn);
     noteElement.appendChild(createDeleteBtn);
     noteElement.appendChild(createEditBtn);
@@ -374,9 +380,11 @@ class App {
 
     if (!notes || !notes.length) return;
 
-    notes.forEach((note) => this.renderNote(note));
+    const sortedNotes = notes.sort((a, b) => b.pin - a.pin);
+
+    sortedNotes.forEach((note) => this.renderNote(note));
   }
 }
 
 const newApp = new App();
-newApp.initialize();
+newApp.init();
