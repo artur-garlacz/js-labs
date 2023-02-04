@@ -4,17 +4,61 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Canvas</title>
     <style>
       canvas {
         border: 1px solid black;
       }
+
+      .container {
+        display: flex;
+      }
+
+      .settings {
+        padding-left: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
     </style>
   </head>
   <body>
-    <canvas width="500" height="500" id="canvas"></canvas>
-    <button id="reset">Reset</button>
-    <button id="start">Start</button>
+    <div class="container">
+      <canvas width="500" height="500" id="canvas"></canvas>
+      <div class="settings">
+        <button id="reset">Reset</button>
+        <button id="start">Start</button>
+
+        <label>Min distance to draw line</label>
+        <input id="minDistance" min="0" value="150" type="number" />
+
+        <label>Number of balls</label>
+        <input id="numberOfBalls" min="0" value="10" type="number" />
+
+        <label
+          >Allow mouse move effect
+          <input id="allowMouseMoveEffect" type="checkbox" checked
+        /></label>
+
+        <label>Mouse move effect</label>
+
+        <label
+          >Repulsion effect
+          <input name="mouseMoveEffect" value="repulsion" type="radio"
+        /></label>
+
+        <label
+          >Fetching effect
+          <input name="mouseMoveEffect" value="fetching" type="radio" checked
+        /></label>
+
+        <label>Repulsion balls power</label>
+        <input id="repulsionBallsPower" min="0" value="100" type="number" />
+
+        <label>Fetching balls power</label>
+        <input id="fetchingBallsPower" min="0" value="40" type="number" />
+      </div>
+    </div>
     <script src="./script.js"></script>
   </body>
 </html>

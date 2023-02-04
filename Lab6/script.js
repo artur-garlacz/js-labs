@@ -67,28 +67,105 @@ class Ball {
       );
     }
   }
+
+  moveFrom(point, distance) {
+    console.log(this.x + this.radius, point.x + distance);
+    this.x += Math.cos(this.direction) * this.speed;
+    this.y += Math.sin(this.direction) * this.speed;
+
+    if (point.x + distance < this.x - this.radius) {
+      this.x = point.x + distance - this.radius;
+
+      this.direction = Math.atan2(
+        Math.sin(this.direction),
+        Math.cos(this.direction) * -1
+      );
+    } else if (point.x - distance > this.x + this.radius) {
+      this.x = point.x - distance - this.radius;
+
+      this.direction = Math.atan2(
+        Math.sin(this.direction),
+        Math.cos(this.direction) * -1
+      );
+    }
+
+    if (point.y + distance < this.y - this.radius) {
+      this.y = point.y + distance - this.radius;
+
+      this.direction = Math.atan2(
+        Math.sin(this.direction) * -1,
+        Math.cos(this.direction)
+      );
+    } else if (point.y - distance > this.y + this.radius) {
+      this.y = point.y - distance - this.radius;
+
+      this.direction = Math.atan2(
+        Math.sin(this.direction) * -1,
+        Math.cos(this.direction)
+      );
+    }
+  }
 }
 
+const MouseMoveEffect = {
+  FETCHING: "fetching",
+  REPULSION: "repulsion",
+};
+
 class BoardConfig {
-  // static yValue = document.getElementById("yValue").value || 0;
-  // static xValue = document.getElementById("xValue").value || 0;
-  // static energySpeed = document.getElementById("energySpeed").value || 0;
-  // static mouseEffectRepulsion = document.getElementById("repulsionEffect")
-  //   .checked
-  //   ? true
-  //   : false;
-  minDistance = document.getElementById("distanceValue")?.value || 150;
-  numberOfBalls = document.getElementById("numberOfBalls")?.value || 10;
-  // static mouseEffectPower =
-  // document.getElementById("powerOfMouseEffect").value || 0;
+  numberOfRespawnedBalls = 2;
+  mouseMoveEffect =
+    document.querySelector('input[name="mouseMoveEffect"]:checked')?.value ||
+    MouseMoveEffect.FETCHING;
+  allowMouseMoveEffect =
+    document.getElementById("allowMouseMoveEffect")?.checked || false;
+  repulsionBallsPower =
+    document.getElementById("repulsionBallsPower").value || 40;
+  fetchingBallsPower =
+    document.getElementById("fetchingBallsPower").value || 40;
+  minDistance = parseInt(document.getElementById("minDistance")?.value) || 150;
+  numberOfBalls =
+    parseInt(document.getElementById("numberOfBalls")?.value) || 10;
+
+  constructor() {
+    this.updateMinDistance();
+    this.updateNumOfBalls();
+    this.updateAllowMouseMoveEffect();
+    this.updateMouseMoveEffect();
+  }
+
+  updateMinDistance() {
+    document.getElementById("minDistance").onkeyup = (e) => {
+      this.minDistance = parseInt(e.target.value) || 150;
+    };
+  }
+
+  updateMouseMoveEffect() {
+    const effects = document.querySelectorAll('input[name="mouseMoveEffect"]');
+    for (const effect of effects) {
+      effect.onclick = (e) => {
+        this.mouseMoveEffect = e.target.value || MouseMoveEffect.FETCHING;
+      };
+    }
+  }
+
+  updateAllowMouseMoveEffect() {
+    document.getElementById("allowMouseMoveEffect").onclick = (e) => {
+      this.allowMouseMoveEffect = e.target.checked || false;
+      console.log(this.allowMouseMoveEffect);
+    };
+  }
+
+  updateNumOfBalls() {
+    document.getElementById("numberOfBalls").onkeyup = (e) => {
+      this.numberOfBalls = parseInt(e.target.value) || 10;
+    };
+  }
 }
 
 class Board {
   balls = [];
   animation = null;
-  numberOfBalls = 10;
-  numberOfRespawnedBalls = 2;
-  minDistance = 150;
   height = document.documentElement.clientHeight - 50;
   width = document.documentElement.clientWidth * 0.75;
   config = new BoardConfig();
@@ -116,8 +193,6 @@ class Board {
 
     const pairs = [];
 
-    console.log("length", this.balls.length);
-
     for (let i = 0; i < this.balls.length; i++) {
       let ball = this.balls[i];
 
@@ -130,7 +205,7 @@ class Board {
         if (i !== j) {
           let ball2 = this.balls[j];
 
-          let distance = this.getDistanceBetweenBalls({
+          let distance = this.getDistanceBetweenPoints({
             x1: ball.x,
             x2: ball2.x,
             y1: ball.y,
@@ -159,7 +234,7 @@ class Board {
     }
   }
 
-  getDistanceBetweenBalls({ x1, y1, x2, y2 }) {
+  getDistanceBetweenPoints({ x1, y1, x2, y2 }) {
     const a = x1 - x2;
     const b = y1 - y2;
 
@@ -169,8 +244,6 @@ class Board {
   }
 
   removeAndRespawnBalls(point) {
-    console.log(point);
-
     this.balls.forEach((ball, idx) => {
       if (
         parseInt(
@@ -179,12 +252,46 @@ class Board {
       ) {
         this.balls.splice(idx, 1);
 
-        this.createBalls(this.numberOfRespawnedBalls);
+        this.createBalls(this.config.numberOfRespawnedBalls);
       }
     });
   }
 
-  pushBalls() {}
+  moveCursor(point) {
+    if (!this.config.allowMouseMoveEffect) return;
+
+    this.fetchBalls(point);
+
+    this.balls.forEach((ball) => {
+      let distance = this.getDistanceBetweenPoints({
+        x1: ball.x,
+        y1: ball.y,
+        x2: point.x,
+        y2: point.y,
+      });
+
+      if (this.config.mouseMoveEffect === MouseMoveEffect.FETCHING) {
+        this.fetchBalls(point, ball, distance);
+      } else if (this.config.mouseMoveEffect === MouseMoveEffect.REPULSION) {
+        this.repulseBalls(point, ball, distance);
+      }
+    });
+  }
+
+  fetchBalls(point, ball, distance) {
+    if (distance <= this.config.fetchingBallsPower) {
+      console.log("fetchBalls");
+      ball.x = point.x;
+      ball.y = point.y;
+    }
+  }
+
+  repulseBalls(point, ball, distance) {
+    if (distance < this.config.repulsionBallsPower) {
+      console.log("repulseBalls");
+      ball.moveFrom(point, distance);
+    }
+  }
 
   createBall() {
     const x = this.getRandomArbitrary(0, this.width);
@@ -209,14 +316,23 @@ const board = new Board();
 
 board.play();
 
-canvas.addEventListener("click", (e) => {
+canvas.onclick = (e) => {
   const point = {
     x: e.clientX - canvas.offsetLeft,
     y: e.clientY - canvas.offsetTop,
   };
 
   board.removeAndRespawnBalls(point);
-});
+};
+
+canvas.onmousemove = (e) => {
+  const point = {
+    x: e.clientX - canvas.offsetLeft,
+    y: e.clientY - canvas.offsetTop,
+  };
+
+  board.moveCursor(point);
+};
 
 document.getElementById("start").onclick = () => board.play();
 document.getElementById("reset").onclick = () => board.clear();
