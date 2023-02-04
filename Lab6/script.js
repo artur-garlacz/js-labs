@@ -10,6 +10,61 @@ const uuidv4 = () => {
   );
 };
 
+class BoardConfig {
+  xValue = 10;
+  yValue = 10;
+  powerSpeed = 0.25;
+  numberOfRespawnedBalls = 2;
+  mouseMoveEffect =
+    document.querySelector('input[name="mouseMoveEffect"]:checked')?.value ||
+    MouseMoveEffect.FETCHING;
+  allowMouseMoveEffect =
+    document.getElementById("allowMouseMoveEffect")?.checked || false;
+  repulsionBallsPower =
+    document.getElementById("repulsionBallsPower").value || 40;
+  fetchingBallsPower =
+    document.getElementById("fetchingBallsPower").value || 40;
+  minDistance = parseInt(document.getElementById("minDistance")?.value) || 150;
+  numberOfBalls =
+    parseInt(document.getElementById("numberOfBalls")?.value) || 10;
+
+  constructor() {
+    this.updateMinDistance();
+    this.updateNumOfBalls();
+    this.updateAllowMouseMoveEffect();
+    this.updateMouseMoveEffect();
+  }
+
+  updateMinDistance() {
+    document.getElementById("minDistance").onkeyup = (e) => {
+      this.minDistance = parseInt(e.target.value) || 150;
+    };
+  }
+
+  updateMouseMoveEffect() {
+    const effects = document.querySelectorAll('input[name="mouseMoveEffect"]');
+    for (const effect of effects) {
+      effect.onclick = (e) => {
+        this.mouseMoveEffect = e.target.value || MouseMoveEffect.FETCHING;
+      };
+    }
+  }
+
+  updateAllowMouseMoveEffect() {
+    document.getElementById("allowMouseMoveEffect").onclick = (e) => {
+      this.allowMouseMoveEffect = e.target.checked || false;
+    };
+  }
+
+  updateNumOfBalls() {
+    document.getElementById("numberOfBalls").onkeyup = (e) => {
+      this.numberOfBalls = parseInt(e.target.value) || 10;
+    };
+  }
+}
+
+const boardConfig = new BoardConfig();
+
 class Ball {
   color =
     "rgb(" +
@@ -20,7 +75,7 @@ class Ball {
     Math.floor(Math.random() * 256) +
     ")";
   direction = Math.random() * Math.PI * 2;
-  speed = Math.random() * 2 + 1;
+  speed = 1;
   id;
   x;
   y;
@@ -69,7 +124,6 @@ class Ball {
   }
 
   moveFrom(point, distance) {
-    console.log(this.x + this.radius, point.x + distance);
     this.x += Math.cos(this.direction) * this.speed;
     this.y += Math.sin(this.direction) * this.speed;
 
@@ -105,6 +159,27 @@ class Ball {
       );
     }
   }
+
+  getCircleArea() {
+    return Math.PI * this.radius ** 2;
+  }
+
+  getBallPower() {
+    return (
+      boardConfig.xValue * this.speed +
+      boardConfig.yValue * this.getCircleArea()
+    );
+  }
+
+  addPower(radius, speed) {
+    this.radius += (boardConfig.powerSpeed * radius) / 100;
+    this.speed -= (boardConfig.powerSpeed * speed) / 100;
+  }
+
+  removePower() {
+    this.radius -= (boardConfig.powerSpeed * this.radius) / 100;
+    this.speed += (boardConfig.powerSpeed * this.speed) / 100;
+  }
 }
 
 const MouseMoveEffect = {
@@ -112,63 +187,16 @@ const MouseMoveEffect = {
   REPULSION: "repulsion",
 };
 
-class BoardConfig {
-  numberOfRespawnedBalls = 2;
-  mouseMoveEffect =
-    document.querySelector('input[name="mouseMoveEffect"]:checked')?.value ||
-    MouseMoveEffect.FETCHING;
-  allowMouseMoveEffect =
-    document.getElementById("allowMouseMoveEffect")?.checked || false;
-  repulsionBallsPower =
-    document.getElementById("repulsionBallsPower").value || 40;
-  fetchingBallsPower =
-    document.getElementById("fetchingBallsPower").value || 40;
-  minDistance = parseInt(document.getElementById("minDistance")?.value) || 150;
-  numberOfBalls =
-    parseInt(document.getElementById("numberOfBalls")?.value) || 10;
-
-  constructor() {
-    this.updateMinDistance();
-    this.updateNumOfBalls();
-    this.updateAllowMouseMoveEffect();
-    this.updateMouseMoveEffect();
-  }
-
-  updateMinDistance() {
-    document.getElementById("minDistance").onkeyup = (e) => {
-      this.minDistance = parseInt(e.target.value) || 150;
-    };
-  }
-
-  updateMouseMoveEffect() {
-    const effects = document.querySelectorAll('input[name="mouseMoveEffect"]');
-    for (const effect of effects) {
-      effect.onclick = (e) => {
-        this.mouseMoveEffect = e.target.value || MouseMoveEffect.FETCHING;
-      };
-    }
-  }
-
-  updateAllowMouseMoveEffect() {
-    document.getElementById("allowMouseMoveEffect").onclick = (e) => {
-      this.allowMouseMoveEffect = e.target.checked || false;
-      console.log(this.allowMouseMoveEffect);
-    };
-  }
-
-  updateNumOfBalls() {
-    document.getElementById("numberOfBalls").onkeyup = (e) => {
-      this.numberOfBalls = parseInt(e.target.value) || 10;
-    };
-  }
-}
+// Gdy kulka łączy się z drugą (linia) energia płynie od kulki słabszej do silniejszej (kulki zmieniają rozmiar).
+// Siła kulki to X * Prędkość + Y * Masa.
+// X, Y oraz prędkość przepływu energii konfigurowalne przez użytkownika.
 
 class Board {
   balls = [];
   animation = null;
   height = document.documentElement.clientHeight - 50;
   width = document.documentElement.clientWidth * 0.75;
-  config = new BoardConfig();
+  // config = new BoardConfig();
 
   play() {
     this.createBalls();
@@ -196,41 +224,53 @@ class Board {
     for (let i = 0; i < this.balls.length; i++) {
       let ball = this.balls[i];
 
-      context.fillStyle = ball.color;
-      context.beginPath();
-      context.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-      context.fill();
+      if (ball.getCircleArea() < 100) {
+        this.balls.splice(i, 1);
+      } else {
+        context.fillStyle = ball.color;
+        context.beginPath();
+        context.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+        context.fill();
 
-      for (let j = 0; j < this.balls.length; j++) {
-        if (i !== j) {
-          let ball2 = this.balls[j];
+        for (let j = 0; j < this.balls.length; j++) {
+          if (i !== j) {
+            let ball2 = this.balls[j];
 
-          let distance = this.getDistanceBetweenPoints({
-            x1: ball.x,
-            x2: ball2.x,
-            y1: ball.y,
-            y2: ball2.y,
-          });
+            let distance = this.getDistanceBetweenPoints({
+              x1: ball.x,
+              x2: ball2.x,
+              y1: ball.y,
+              y2: ball2.y,
+            });
 
-          const containsPair = pairs.some((pair) => {
-            return (
-              (pair[0] === i && pair[1] === j) ||
-              (pair[0] === j && pair[1] === i)
-            );
-          });
+            const containsPair = pairs.some((pair) => {
+              return (
+                (pair[0] === i && pair[1] === j) ||
+                (pair[0] === j && pair[1] === i)
+              );
+            });
 
-          if (distance < this.config.minDistance && !containsPair) {
-            pairs.push([i, j]);
+            if (distance < boardConfig.minDistance && !containsPair) {
+              pairs.push([i, j]);
 
-            context.beginPath();
-            context.moveTo(ball.x, ball.y);
-            context.lineTo(ball2.x, ball2.y);
-            context.stroke();
+              context.beginPath();
+              context.moveTo(ball.x, ball.y);
+              context.lineTo(ball2.x, ball2.y);
+              context.stroke();
+
+              // if (ball.getBallPower() > ball2.getBallPower()) {
+              //   ball.addPower(ball2.radius, ball2.speed);
+              //   ball2.removePower();
+              // } else {
+              //   ball2.addPower(ball.radius, ball.speed);
+              //   ball.removePower();
+              // }
+            }
           }
         }
-      }
 
-      ball.move(this.width, this.height);
+        ball.move(this.width, this.height);
+      }
     }
   }
 
@@ -252,13 +292,13 @@ class Board {
       ) {
         this.balls.splice(idx, 1);
 
-        this.createBalls(this.config.numberOfRespawnedBalls);
+        this.createBalls(boardConfig.numberOfRespawnedBalls);
       }
     });
   }
 
   moveCursor(point) {
-    if (!this.config.allowMouseMoveEffect) return;
+    if (!boardConfig.allowMouseMoveEffect) return;
 
     this.fetchBalls(point);
 
@@ -270,16 +310,16 @@ class Board {
         y2: point.y,
       });
 
-      if (this.config.mouseMoveEffect === MouseMoveEffect.FETCHING) {
+      if (boardConfig.mouseMoveEffect === MouseMoveEffect.FETCHING) {
         this.fetchBalls(point, ball, distance);
-      } else if (this.config.mouseMoveEffect === MouseMoveEffect.REPULSION) {
+      } else if (boardConfig.mouseMoveEffect === MouseMoveEffect.REPULSION) {
         this.repulseBalls(point, ball, distance);
       }
     });
   }
 
   fetchBalls(point, ball, distance) {
-    if (distance <= this.config.fetchingBallsPower) {
+    if (distance <= boardConfig.fetchingBallsPower) {
       console.log("fetchBalls");
       ball.x = point.x;
       ball.y = point.y;
@@ -287,7 +327,7 @@ class Board {
   }
 
   repulseBalls(point, ball, distance) {
-    if (distance < this.config.repulsionBallsPower) {
+    if (distance < boardConfig.repulsionBallsPower) {
       console.log("repulseBalls");
       ball.moveFrom(point, distance);
     }
@@ -300,7 +340,7 @@ class Board {
   }
 
   createBalls(length) {
-    length = length || this.config.numberOfBalls;
+    length = length || boardConfig.numberOfBalls;
 
     for (let index = 0; index < length; index++) {
       this.createBall();
