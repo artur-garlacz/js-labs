@@ -48,14 +48,11 @@ const metronomeBpm = document.getElementById("metronomeBpm");
 
 function playSound(url, options) {
   return new Promise(function (resolve, reject) {
-    console.log("audio");
-
-    // return a promise
-    const audio = new Audio(); // create audio wo/ src
-    audio.preload = "auto"; // intend to play through
-    audio.autoplay = true; // autoplay when loaded
-    audio.onerror = reject; // on error, reject
-    audio.onended = resolve; // when done, resolve
+    const audio = new Audio();
+    audio.preload = "auto";
+    audio.autoplay = true;
+    audio.onerror = reject;
+    audio.onended = resolve;
 
     audio.src = url;
   });
@@ -157,7 +154,9 @@ const app = {
       this.initTrackRecordings(trackId);
 
       this.assingPlayerButton(track);
-      track.addEventListener("click", (e) => this.toggleSelectedTrack(e));
+      track.addEventListener("click", (e) => {
+        this.toggleSelectedTrack(e);
+      });
     }
   },
   createTrack() {
@@ -178,16 +177,27 @@ const app = {
     cleanBtn.className = "clear-btn";
     cleanBtn.innerText = "Clear";
 
+    const removeBtn = document.createElement("button");
+    removeBtn.className = "remove-btn";
+    removeBtn.innerText = "Remove";
+
     track.innerText = tracks.length + 1;
     track.appendChild(playBtn);
     track.appendChild(inp);
     track.appendChild(cleanBtn);
+    track.appendChild(removeBtn);
     document.querySelector(".tracks").appendChild(track);
 
     this.assingTracks();
     this.initSelectingTrack();
   },
+  removeTrack(track, trackId) {
+    document.querySelector(".tracks").removeChild(track);
+    this.trackRecordings[trackId] = [];
+  },
   toggleSelectedTrack(e) {
+    console.log(e.target, this.currentTrack, e.target.getAttribute("id"));
+
     if (!!this.currentTrack) {
       document
         .getElementById(this.currentTrack)
@@ -199,13 +209,22 @@ const app = {
   },
   assingPlayerButton(track) {
     const trackId = track.getAttribute("id");
-    track
-      .querySelector("button.play-btn")
-      .addEventListener("click", () => this.playRecording(trackId));
+    track.querySelector("button.play-btn").addEventListener("click", (e) => {
+      e.stopPropagation();
 
-    track
-      .querySelector("button.clear-btn")
-      .addEventListener("click", () => this.clearTrackRecording(trackId));
+      this.playRecording(trackId);
+    });
+
+    track.querySelector("button.clear-btn").addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      this.clearTrackRecording(trackId);
+    });
+
+    track.querySelector("button.remove-btn").addEventListener("click", (e) => {
+      e.stopPropagation();
+      this.removeTrack(track, trackId);
+    });
   },
   clearTrackRecording(trackId) {
     this.trackRecordings[trackId] = [];
